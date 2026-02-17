@@ -4,6 +4,8 @@ import { ContentSection } from '@/components/common/ContentSection'
 import { Product } from '@/lib/types'
 import { supabase } from '@/lib/supabase'
 
+export const revalidate = 0 // Force dynamic data fetching
+
 async function getHorlogerieProducts() {
   try {
     const { data: products, error } = await supabase

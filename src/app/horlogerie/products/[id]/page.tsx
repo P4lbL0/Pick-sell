@@ -3,6 +3,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
+export const revalidate = 0 // Force dynamic data fetching
+
 async function getProduct(id: string) {
   try {
     const { data: product, error } = await supabase
