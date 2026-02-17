@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Product } from '@/lib/types'
+import { revalidateProductPages } from '@/app/admin/actions'
 
 interface ProductFormProps {
   product?: Product | null
@@ -94,6 +95,9 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
           }])
         if (insertError) throw insertError
       }
+
+      // Revalidate the product pages on Vercel
+      await revalidateProductPages(formData.universe)
 
       onClose()
     } catch (err: any) {

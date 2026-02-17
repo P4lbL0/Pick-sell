@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { HeroSlide } from '@/lib/types'
+import { revalidateHeroSlides } from '@/app/admin/actions'
 import HeroSlideForm from '@/components/admin/HeroSlideForm'
 import HeroSlideTable from '@/components/admin/HeroSlideTable'
 
@@ -37,12 +38,18 @@ export default function HeroSlidesPage() {
     if (!confirm('Êtes-vous sûr de vouloir supprimer cette bannière ?')) return
 
     try {
+      const slide = slides.find(s => s.id === id)
       const { error } = await supabase
         .from('hero_slides')
         .delete()
         .eq('id', id)
       if (error) throw error
       setSlides(slides.filter(s => s.id !== id))
+      
+      // Revalidate the banner pages
+      if (slide) {
+        await revalidateHeroSlides(slide.universe_type)
+      }
     } catch (error) {
       console.error('Erreur lors de la suppression:', error)
     }

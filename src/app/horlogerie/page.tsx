@@ -4,7 +4,7 @@ import { ContentSection } from '@/components/common/ContentSection'
 import { Product } from '@/lib/types'
 import { supabase } from '@/lib/supabase'
 
-export const revalidate = 0 // Force dynamic data fetching
+export const revalidate = 60 // ISR: revalidate every 60 seconds, admin actions will clear cache immediately
 
 async function getHorlogerieProducts() {
   try {

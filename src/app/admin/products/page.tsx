@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Product } from '@/lib/types'
+import { revalidateProductPages } from '@/app/admin/actions'
 import ProductForm from '@/components/admin/ProductForm'
 import ProductTable from '@/components/admin/ProductTable'
 
@@ -41,9 +42,15 @@ export default function ProductsPage() {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) return
 
     try {
+      const product = products.find(p => p.id === id)
       const { error } = await supabase.from('products').delete().eq('id', id)
       if (error) throw error
       setProducts(products.filter(p => p.id !== id))
+      
+      // Revalidate the product pages
+      if (product) {
+        await revalidateProductPages(product.universe)
+      }
     } catch (error) {
       console.error('Erreur lors de la suppression:', error)
     }

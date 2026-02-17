@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { HeroSlide } from '@/lib/types'
+import { revalidateHeroSlides } from '@/app/admin/actions'
 
 interface HeroSlideFormProps {
   slide?: HeroSlide | null
@@ -96,6 +97,9 @@ export default function HeroSlideForm({ slide, onClose }: HeroSlideFormProps) {
           .insert([payload])
         if (insertError) throw insertError
       }
+
+      // Revalidate the banner pages
+      await revalidateHeroSlides(formData.universe_type)
 
       onClose()
     } catch (err: any) {
