@@ -49,7 +49,7 @@ function SidebarContent({ pathname, onClose }: { pathname: string; onClose?: () 
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    target={link.external ? '_blank' : undefined}
+                    target={'external' in link && link.external ? '_blank' : undefined}
                     className={`nav-link${pathname === link.href ? ' nav-link-active' : ''}`}
                     onClick={onClose}
                   >

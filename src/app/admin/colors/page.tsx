@@ -24,7 +24,7 @@ export default function ColorsPage() {
 
   const fetchProducts = async () => {
     const { data } = await supabase.from('products').select('id, title, universe').order('title')
-    setProducts(data || [])
+    setProducts((data as unknown as Product[]) || [])
   }
 
   const fetchColors = async () => {

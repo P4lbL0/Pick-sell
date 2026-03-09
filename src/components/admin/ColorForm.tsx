@@ -29,7 +29,7 @@ export default function ColorForm({ color, onClose }: ColorFormProps) {
         .from('products')
         .select('id, title, universe')
         .order('title')
-      setProducts(data || [])
+      setProducts((data as unknown as Product[]) || [])
     }
     fetchProducts()
   }, [])
