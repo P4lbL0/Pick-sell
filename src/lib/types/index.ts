@@ -99,3 +99,41 @@ export interface Contact {
   url: string
   icon?: string
 }
+
+// ─── Quote Requests (customer submissions) ───────────────────────────────────
+
+export interface QuoteFormFieldOption {
+  value: string
+  label: string
+}
+
+export interface QuoteFormField {
+  name: string
+  label: string
+  type: 'text' | 'email' | 'tel' | 'select' | 'textarea' | 'checkbox-group'
+  required: boolean
+  placeholder?: string
+  options?: QuoteFormFieldOption[]
+  row?: number
+}
+
+export interface QuoteFormConfig {
+  id?: string
+  universe: 'horlogerie' | 'informatique'
+  service_type: 'repair' | 'custom' | 'buyback'
+  fields: QuoteFormField[]
+  updated_at?: string
+}
+
+export interface QuoteRequest {
+  id: string
+  universe: 'horlogerie' | 'informatique'
+  service_type: 'repair' | 'custom' | 'buyback'
+  name: string
+  email: string
+  phone?: string
+  data: Record<string, unknown>
+  status: 'new' | 'read' | 'in_progress' | 'done' | 'rejected'
+  notes?: string
+  created_at: string
+}
