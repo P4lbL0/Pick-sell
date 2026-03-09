@@ -12,7 +12,36 @@ export interface Product {
   category: 'seiko-mod' | 'diverse' | 'accessories' | 'computer' | 'computer-accessories'
   universe: 'horlogerie' | 'informatique'
   image_url: string
+  vinted_url?: string
   created_at: string
+}
+
+export interface ProductColor {
+  id: string
+  product_id: string
+  name: string
+  hex_color: string
+  image_url?: string
+  stock: number
+  created_at: string
+}
+
+export interface QuoteItem {
+  label: string
+  price_min: number
+  price_max: number
+  description?: string
+}
+
+export interface ServiceQuote {
+  id: string
+  title: string
+  universe: 'horlogerie' | 'informatique'
+  service_type: 'repair' | 'custom' | 'buyback'
+  items: QuoteItem[]
+  note?: string
+  created_at: string
+  updated_at: string
 }
 
 export interface ProductDetail extends Product {

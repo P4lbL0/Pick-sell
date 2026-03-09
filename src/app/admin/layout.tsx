@@ -1,93 +1,108 @@
-import React from 'react'
+'use client'
+
+import React, { useState } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import '../../styles/admin.css'
 
-export const metadata = {
-  title: 'Pick Sell - Administration',
-  description: 'Interface de gestion du site Pick Sell',
+const navItems = [
+  {
+    section: 'Gestion',
+    links: [
+      { href: '/admin', label: 'Tableau de bord', icon: '📊' },
+      { href: '/admin/products', label: 'Produits', icon: '📦' },
+      { href: '/admin/colors', label: 'Coloris', icon: '🎨' },
+      { href: '/admin/services', label: 'Services', icon: '🔧' },
+      { href: '/admin/quotes', label: 'Devis', icon: '💰' },
+    ],
+  },
+  {
+    section: 'Contenu',
+    links: [
+      { href: '/admin/content', label: 'Blocs de contenu', icon: '📝' },
+      { href: '/admin/hero-slides', label: 'Bannières accueil', icon: '🖼️' },
+      { href: '/admin/contacts', label: 'Contacts', icon: '📞' },
+    ],
+  },
+  {
+    section: 'Utilitaires',
+    links: [
+      { href: '/', label: 'Voir le site', icon: '👁️', external: true },
+    ],
+  },
+]
+
+function SidebarContent({ pathname, onClose }: { pathname: string; onClose?: () => void }) {
+  return (
+    <>
+      <div className="admin-logo">
+        <h1>PICK SELL</h1>
+        <p className="admin-subtitle">Administration</p>
+      </div>
+
+      <nav className="admin-nav">
+        {navItems.map((section) => (
+          <div key={section.section} className="nav-section">
+            <h3>{section.section}</h3>
+            <ul>
+              {section.links.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    target={link.external ? '_blank' : undefined}
+                    className={`nav-link${pathname === link.href ? ' nav-link-active' : ''}`}
+                    onClick={onClose}
+                  >
+                    {link.icon} {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </nav>
+
+      <div className="admin-footer">
+        <p>v1.1.0</p>
+      </div>
+    </>
+  )
 }
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const [menuOpen, setMenuOpen] = useState(false)
+  const pathname = usePathname()
+
   return (
     <div className="admin-container">
+      {/* Sidebar desktop */}
       <aside className="admin-sidebar">
-        <div className="admin-logo">
-          <h1>PICK SELL</h1>
-          <p className="admin-subtitle">Administration</p>
-        </div>
+        <SidebarContent pathname={pathname} />
+      </aside>
 
-        <nav className="admin-nav">
-          <div className="nav-section">
-            <h3>Gestion</h3>
-            <ul>
-              <li>
-                <Link href="/admin" className="nav-link">
-                  📊 Tableau de bord
-                </Link>
-              </li>
-              <li>
-                <Link href="/admin/products" className="nav-link">
-                  📦 Produits
-                </Link>
-              </li>
-              <li>
-                <Link href="/admin/services" className="nav-link">
-                  🔧 Services
-                </Link>
-              </li>
-            </ul>
-          </div>
+      {/* Overlay mobile */}
+      {menuOpen && (
+        <div className="admin-overlay" onClick={() => setMenuOpen(false)} />
+      )}
 
-          <div className="nav-section">
-            <h3>Contenu</h3>
-            <ul>
-              <li>
-                <Link href="/admin/content" className="nav-link">
-                  📝 Blocs de contenu
-                </Link>
-              </li>
-              <li>
-                <Link href="/admin/hero-slides" className="nav-link">
-                  🖼️ Bannières accueil
-                </Link>
-              </li>
-              <li>
-                <Link href="/admin/contacts" className="nav-link">
-                  📞 Contacts
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div className="nav-section">
-            <h3>Utilitaires</h3>
-            <ul>
-              <li>
-                <Link href="/" target="_blank" className="nav-link">
-                  👁️ Voir le site
-                </Link>
-              </li>
-              <li>
-                <a href="/admin/settings" className="nav-link">
-                  ⚙️ Paramètres
-                </a>
-              </li>
-            </ul>
-          </div>
-        </nav>
-
-        <div className="admin-footer">
-          <p>v1.0.0</p>
-        </div>
+      {/* Drawer mobile */}
+      <aside className={`admin-drawer${menuOpen ? ' admin-drawer-open' : ''}`}>
+        <button className="drawer-close" onClick={() => setMenuOpen(false)}>✕</button>
+        <SidebarContent pathname={pathname} onClose={() => setMenuOpen(false)} />
       </aside>
 
       <main className="admin-main">
         <header className="admin-header">
-          <h2>Pick Sell Administration</h2>
+          <div className="header-left">
+            <button
+              className="hamburger-btn"
+              onClick={() => setMenuOpen(true)}
+              aria-label="Ouvrir le menu"
+            >
+              <span /><span /><span />
+            </button>
+            <h2>Pick Sell Admin</h2>
+          </div>
           <div className="header-actions">
             <span className="user-badge">Admin</span>
           </div>

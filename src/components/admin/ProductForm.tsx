@@ -20,6 +20,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
     category: product?.category || 'seiko-mod',
     universe: product?.universe || 'horlogerie',
     image_url: product?.image_url || '',
+    vinted_url: product?.vinted_url || '',
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -210,6 +211,18 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
             required
             rows={5}
             placeholder="Description complète du produit"
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="vinted_url">Lien Vinted</label>
+          <input
+            type="url"
+            id="vinted_url"
+            name="vinted_url"
+            value={formData.vinted_url}
+            onChange={handleChange}
+            placeholder="https://www.vinted.fr/items/..."
           />
         </div>
 

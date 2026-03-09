@@ -24,6 +24,7 @@ export default function ProductTable({ products, onEdit, onDelete }: ProductTabl
             <th>Catégorie</th>
             <th>Prix</th>
             <th>Stock</th>
+            <th>Vinted</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -40,6 +41,15 @@ export default function ProductTable({ products, onEdit, onDelete }: ProductTabl
               <td className="price">{product.price.toFixed(2)}€</td>
               <td className={product.stock > 0 ? 'in-stock' : 'out-of-stock'}>
                 {product.stock}
+              </td>
+              <td>
+                {product.vinted_url ? (
+                  <a href={product.vinted_url} target="_blank" rel="noopener noreferrer" className="vinted-link">
+                    🛍️ Voir
+                  </a>
+                ) : (
+                  <span className="no-link">—</span>
+                )}
               </td>
               <td className="actions">
                 <button
