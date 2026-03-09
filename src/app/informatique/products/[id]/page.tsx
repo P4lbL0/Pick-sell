@@ -98,16 +98,23 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             </div>
 
             {/* CTA Button */}
-            <button 
-              className={`w-full py-4 rounded-lg font-bold text-lg transition ${
-                product.stock > 0
-                  ? 'bg-gray-900 text-white hover:bg-gray-800'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              }`}
-              disabled={product.stock === 0}
-            >
-              {product.stock > 0 ? 'Ajouter au panier' : 'Indisponible'}
-            </button>
+            {product.stock > 0 && product.vinted_url ? (
+              <a
+                href={product.vinted_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-4 rounded-lg font-bold text-lg transition bg-teal-600 text-white hover:bg-teal-700 text-center block"
+              >
+                Poursuivre sur Vinted
+              </a>
+            ) : (
+              <button
+                className="w-full py-4 rounded-lg font-bold text-lg transition bg-gray-300 text-gray-500 cursor-not-allowed"
+                disabled
+              >
+                Indisponible
+              </button>
+            )}
 
             {/* Contact */}
             <p className="text-center text-gray-600 text-sm mt-6">

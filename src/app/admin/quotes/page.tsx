@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
@@ -13,7 +13,7 @@ type Tab = 'requests' | 'pricing' | 'config'
 export default function QuotesPage() {
   const [activeTab, setActiveTab] = useState<Tab>('requests')
 
-  // â”€â”€ Tab: Demandes reÃ§ues â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Tab: Demandes reçues ──────────────────────────────────────────────────
   const [requests, setRequests] = useState<QuoteRequest[]>([])
   const [reqLoading, setReqLoading] = useState(true)
   const [filterReqUniverse, setFilterReqUniverse] = useState<'all' | 'horlogerie' | 'informatique'>('all')
@@ -51,7 +51,7 @@ export default function QuotesPage() {
     setRequests((prev) => prev.map((r) => (r.id === id ? { ...r, notes } : r)))
   }
 
-  // â”€â”€ Tab: Grilles tarifaires â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Tab: Grilles tarifaires ──────────────────────────────────────────────
   const [quotes, setQuotes] = useState<ServiceQuote[]>([])
   const [pricingLoading, setPricingLoading] = useState(false)
   const [showForm, setShowForm] = useState(false)
@@ -91,7 +91,7 @@ export default function QuotesPage() {
     fetchQuotes()
   }
 
-  // â”€â”€ Tab: Configuration formulaires â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Tab: Configuration formulaires ──────────────────────────────────────
   const [configs, setConfigs] = useState<QuoteFormConfig[]>([])
   const [configLoading, setConfigLoading] = useState(false)
 
@@ -112,7 +112,7 @@ export default function QuotesPage() {
     if (activeTab === 'config') fetchConfigs()
   }, [activeTab])
 
-  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ────────────────────────────────────────────────────────────────────────
   const tabStyle = (tab: Tab) => ({
     padding: '10px 20px',
     border: 'none',
@@ -129,12 +129,12 @@ export default function QuotesPage() {
     <div className="admin-page">
       <div className="page-header">
         <div>
-          <h1>ðŸ’° Devis</h1>
-          <p>GÃ©rez les demandes clients, les grilles tarifaires et la configuration des formulaires</p>
+          <h1>💰 Devis</h1>
+          <p>Gérez les demandes clients, les grilles tarifaires et la configuration des formulaires</p>
         </div>
         {activeTab === 'pricing' && (
           <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
-            {showForm ? 'âœ• Fermer' : '+ Nouvelle grille'}
+            {showForm ? '✕ Fermer' : '+ Nouvelle grille'}
           </button>
         )}
       </div>
@@ -142,7 +142,7 @@ export default function QuotesPage() {
       {/* Onglets */}
       <div style={{ display: 'flex', borderBottom: '1px solid #e5e7eb', marginBottom: 24, gap: 4 }}>
         <button style={tabStyle('requests')} onClick={() => setActiveTab('requests')}>
-          ðŸ“¨ Demandes reÃ§ues
+          📨 Demandes reçues
           {requests.length > 0 && activeTab !== 'requests' && (
             <span
               style={{
@@ -159,14 +159,14 @@ export default function QuotesPage() {
           )}
         </button>
         <button style={tabStyle('pricing')} onClick={() => setActiveTab('pricing')}>
-          ðŸ’° Grilles tarifaires
+          💰 Grilles tarifaires
         </button>
         <button style={tabStyle('config')} onClick={() => setActiveTab('config')}>
-          âš™ï¸ Formulaires
+          ⚙️ Formulaires
         </button>
       </div>
 
-      {/* â”€â”€ Demandes reÃ§ues â”€â”€ */}
+      {/* ── Demandes reçues ── */}
       {activeTab === 'requests' && (
         <>
           <div className="filters">
@@ -176,8 +176,8 @@ export default function QuotesPage() {
               className="filter-select"
             >
               <option value="all">Tous les univers</option>
-              <option value="horlogerie">âŒš Horlogerie</option>
-              <option value="informatique">ðŸ’» Informatique</option>
+              <option value="horlogerie">⌚ Horlogerie</option>
+              <option value="informatique">💻 Informatique</option>
             </select>
             <select
               value={filterReqType}
@@ -185,9 +185,9 @@ export default function QuotesPage() {
               className="filter-select"
             >
               <option value="all">Tous les types</option>
-              <option value="repair">ðŸ”§ RÃ©paration</option>
-              <option value="custom">âœ¨ Personnalisation</option>
-              <option value="buyback">ðŸ”„ Reprise</option>
+              <option value="repair">🔧 Réparation</option>
+              <option value="custom">✨ Personnalisation</option>
+              <option value="buyback">🔄 Reprise</option>
             </select>
             <select
               value={filterReqStatus}
@@ -195,11 +195,11 @@ export default function QuotesPage() {
               className="filter-select"
             >
               <option value="all">Tous les statuts</option>
-              <option value="new">ðŸ”µ Nouveau</option>
-              <option value="read">ðŸ‘ï¸ Lu</option>
-              <option value="in_progress">ðŸ”„ En cours</option>
-              <option value="done">âœ… TraitÃ©</option>
-              <option value="rejected">âŒ RefusÃ©</option>
+              <option value="new">🔵 Nouveau</option>
+              <option value="read">👁️ Lu</option>
+              <option value="in_progress">🔄 En cours</option>
+              <option value="done">✅ Traité</option>
+              <option value="rejected">❌ Refusé</option>
             </select>
           </div>
           {reqLoading ? (
@@ -214,7 +214,7 @@ export default function QuotesPage() {
         </>
       )}
 
-      {/* â”€â”€ Grilles tarifaires â”€â”€ */}
+      {/* ── Grilles tarifaires ── */}
       {activeTab === 'pricing' && (
         <>
           <div className="filters">
@@ -224,8 +224,8 @@ export default function QuotesPage() {
               className="filter-select"
             >
               <option value="all">Tous les univers</option>
-              <option value="horlogerie">âŒš Horlogerie</option>
-              <option value="informatique">ðŸ’» Informatique</option>
+              <option value="horlogerie">⌚ Horlogerie</option>
+              <option value="informatique">💻 Informatique</option>
             </select>
             <select
               value={filterType}
@@ -233,9 +233,9 @@ export default function QuotesPage() {
               className="filter-select"
             >
               <option value="all">Tous les types</option>
-              <option value="repair">ðŸ”§ RÃ©paration</option>
-              <option value="custom">âœ¨ Personnalisation</option>
-              <option value="buyback">ðŸ”„ Reprise</option>
+              <option value="repair">🔧 Réparation</option>
+              <option value="custom">✨ Personnalisation</option>
+              <option value="buyback">🔄 Reprise</option>
             </select>
           </div>
           {showForm && <QuoteForm quote={editingQuote} onClose={handleFormClose} />}
@@ -251,7 +251,7 @@ export default function QuotesPage() {
         </>
       )}
 
-      {/* â”€â”€ Configuration formulaires â”€â”€ */}
+      {/* ── Configuration formulaires ── */}
       {activeTab === 'config' && (
         <>
           {configLoading ? (

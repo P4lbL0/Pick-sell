@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState } from 'react'
-import { supabase } from '@/lib/supabase'
 import type { QuoteFormConfig, QuoteFormField, QuoteFormFieldOption } from '@/lib/types'
 
 interface Props {
@@ -79,18 +78,13 @@ export default function QuoteFormConfigEditor({ configs, onSaved }: Props) {
     setSaving(true)
     setSaveMsg('')
     try {
-      const { error } = await supabase.from('quote_form_configs').upsert(
-        [
-          {
-            universe: selectedUniverse,
-            service_type: selectedType,
-            fields,
-            updated_at: new Date().toISOString(),
-          },
-        ],
-        { onConflict: 'universe,service_type' }
-      )
-      if (error) throw error
+      const res = await fetch('/api/admin/quote-form-configs', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ universe: selectedUniverse, service_type: selectedType, fields }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Erreur serveur')
       setSaveMsg('✅ Configuration sauvegardée !')
       onSaved()
     } catch (err: unknown) {
