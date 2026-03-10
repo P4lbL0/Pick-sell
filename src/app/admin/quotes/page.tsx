@@ -23,13 +23,14 @@ export default function QuotesPage() {
   const fetchRequests = async () => {
     setReqLoading(true)
     try {
-      let query = supabase.from('quote_requests').select('*')
-      if (filterReqUniverse !== 'all') query = query.eq('universe', filterReqUniverse)
-      if (filterReqType !== 'all') query = query.eq('service_type', filterReqType)
-      if (filterReqStatus !== 'all') query = query.eq('status', filterReqStatus)
-      const { data, error } = await query.order('created_at', { ascending: false })
-      if (error) throw error
-      setRequests((data as unknown as QuoteRequest[]) || [])
+      const qs = new URLSearchParams()
+      if (filterReqUniverse) qs.set('universe', filterReqUniverse)
+      if (filterReqType) qs.set('service_type', filterReqType)
+      if (filterReqStatus) qs.set('status', filterReqStatus)
+      const res = await fetch('/api/admin/quote-requests?' + qs.toString())
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || 'Failed')
+      setRequests((json.data as QuoteRequest[]) || [])
     } catch (err) {
       console.error('Erreur chargement demandes:', err)
     } finally {
@@ -42,13 +43,25 @@ export default function QuotesPage() {
   }, [activeTab, filterReqUniverse, filterReqType, filterReqStatus])
 
   const handleStatusChange = async (id: string, status: QuoteRequest['status']) => {
-    await supabase.from('quote_requests').update({ status }).eq('id', id)
-    setRequests((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)))
+    try {
+      const res = await fetch('/api/admin/quote-requests', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, status }) })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || 'Failed')
+      setRequests((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)))
+    } catch (err) {
+      console.error('Erreur update statut:', err)
+    }
   }
 
   const handleNotesChange = async (id: string, notes: string) => {
-    await supabase.from('quote_requests').update({ notes }).eq('id', id)
-    setRequests((prev) => prev.map((r) => (r.id === id ? { ...r, notes } : r)))
+    try {
+      const res = await fetch('/api/admin/quote-requests', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, notes }) })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || 'Failed')
+      setRequests((prev) => prev.map((r) => (r.id === id ? { ...r, notes } : r)))
+    } catch (err) {
+      console.error('Erreur update notes:', err)
+    }
   }
 
   // ── Tab: Grilles tarifaires ──────────────────────────────────────────────
