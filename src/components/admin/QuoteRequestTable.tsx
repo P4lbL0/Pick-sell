@@ -161,7 +161,7 @@ export default function QuoteRequestTable({
                               <div style={{ fontSize: '0.75rem', color: '#666', marginBottom: 4 }}>
                                 {key}
                               </div>
-                              <div style={{ fontSize: '0.9rem', fontWeight: 500 }}>{display}</div>
+                              <div style={{ fontSize: '0.9rem', fontWeight: 500, whiteSpace: 'pre-wrap' }}>{display}</div>
                             </div>
                           )
                         })}

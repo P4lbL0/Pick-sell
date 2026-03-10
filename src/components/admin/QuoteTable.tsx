@@ -76,7 +76,7 @@ export default function QuoteTable({ quotes, onEdit, onDelete }: QuoteTableProps
                               : `${item.price_min}€ – ${item.price_max}€`}
                           </span>
                           {item.description && (
-                            <span className="quote-item-desc">{item.description}</span>
+                            <div className="quote-item-desc" style={{ whiteSpace: 'pre-wrap' }}>{item.description}</div>
                           )}
                         </div>
                       ))}
