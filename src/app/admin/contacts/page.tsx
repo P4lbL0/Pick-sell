@@ -69,7 +69,8 @@ export default function ContactsPage() {
       </div>
 
       {showForm && (
-        <ContactForm 
+        <ContactForm
+          key={editingContact?.id || 'new'}
           contact={editingContact}
           onClose={handleFormClose}
         />

@@ -102,6 +102,7 @@ export interface Contact {
   id: string
   platform: 'email' | 'whatsapp' | 'tiktok' | 'instagram' | 'vinted'
   url: string
+  universe: 'global' | 'horlogerie' | 'informatique'
   icon?: string
 }
 

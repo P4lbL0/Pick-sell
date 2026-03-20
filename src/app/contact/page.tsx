@@ -22,16 +22,25 @@ export default function ContactPage() {
       .catch(() => {})
   }, [])
 
-  const getContactDisplay = (platform: string) => {
-    const map: Record<string, { label: string; icon: string; color: string }> = {
-      email:     { label: 'Email',     icon: '📧', color: 'from-blue-50 to-blue-100 border-blue-200' },
-      whatsapp:  { label: 'WhatsApp',  icon: '💬', color: 'from-green-50 to-green-100 border-green-200' },
-      instagram: { label: 'Instagram', icon: '📷', color: 'from-pink-50 to-pink-100 border-pink-200' },
-      tiktok:    { label: 'TikTok',    icon: '🎵', color: 'from-gray-50 to-gray-100 border-gray-200' },
-      vinted:    { label: 'Vinted',    icon: '🛍️', color: 'from-teal-50 to-teal-100 border-teal-200' },
-    }
-    return map[platform] || { label: platform, icon: '🔗', color: 'from-gray-50 to-gray-100 border-gray-200' }
+  const PLATFORM_INFO: Record<string, { label: string; icon: string; color: string }> = {
+    email:     { label: 'Email',     icon: '📧', color: 'from-blue-50 to-blue-100 border-blue-200' },
+    whatsapp:  { label: 'WhatsApp',  icon: '💬', color: 'from-green-50 to-green-100 border-green-200' },
+    instagram: { label: 'Instagram', icon: '📷', color: 'from-pink-50 to-pink-100 border-pink-200' },
+    tiktok:    { label: 'TikTok',    icon: '🎵', color: 'from-gray-50 to-gray-100 border-gray-200' },
+    vinted:    { label: 'Vinted',    icon: '🛍️', color: 'from-teal-50 to-teal-100 border-teal-200' },
   }
+
+  const getContactDisplay = (platform: string) =>
+    PLATFORM_INFO[platform] || { label: platform, icon: '🔗', color: 'from-gray-50 to-gray-100 border-gray-200' }
+
+  function displayLabel(platform: string, url: string) {
+    if (platform === 'email') return url.replace('mailto:', '')
+    if (platform === 'whatsapp') return url.replace('https://wa.me/', '+')
+    return url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')
+  }
+
+  const horlogerieContacts = contacts.filter(c => c.universe === 'horlogerie' || c.universe === 'global')
+  const informatiqueContacts = contacts.filter(c => c.universe === 'informatique' || c.universe === 'global')
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -61,10 +70,29 @@ export default function ContactPage() {
     }
   }
 
-  const displayedContacts = contacts.length > 0 ? contacts : [
-    { platform: 'email', url: 'mailto:contact@picksell.fr' },
-    { platform: 'whatsapp', url: 'https://wa.me/' },
-  ]
+  function ContactCards({ list }: { list: typeof contacts }) {
+    if (list.length === 0) return (
+      <p className="text-gray-400 text-sm py-4">Aucun contact configuré pour le moment.</p>
+    )
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        {list.map(c => {
+          const info = getContactDisplay(c.platform)
+          return (
+            <a key={c.id} href={c.url} target="_blank" rel="noopener noreferrer"
+              className={`bg-gradient-to-br ${info.color} p-6 rounded-xl border hover:shadow-md transition group`}>
+              <div className="text-3xl mb-3">{info.icon}</div>
+              <h3 className="font-bold text-gray-900 mb-1">{info.label}</h3>
+              <p className="text-gray-600 text-sm truncate">{displayLabel(c.platform, c.url)}</p>
+              <span className="text-xs text-gray-500 group-hover:text-gray-700 mt-2 inline-block transition">
+                Nous contacter →
+              </span>
+            </a>
+          )
+        })}
+      </div>
+    )
+  }
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -77,29 +105,24 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* Contact cards */}
+      {/* Contact cards par univers */}
       <section className="py-12">
         <div className="max-w-4xl mx-auto px-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-12">
-            {displayedContacts.map(c => {
-              const info = getContactDisplay(c.platform)
-              return (
-                <a
-                  key={c.platform}
-                  href={c.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`bg-gradient-to-br ${info.color} p-6 rounded-xl border hover:shadow-md transition group`}
-                >
-                  <div className="text-3xl mb-3">{info.icon}</div>
-                  <h3 className="font-bold text-gray-900 mb-1">{info.label}</h3>
-                  <p className="text-gray-600 text-sm truncate">{c.url.replace(/^(mailto:|https?:\/\/)/, '')}</p>
-                  <span className="text-xs text-gray-500 group-hover:text-gray-700 mt-2 inline-block transition">
-                    Nous écrire →
-                  </span>
-                </a>
-              )
-            })}
+
+          {/* Horlogerie */}
+          <div className="mb-10">
+            <h2 className="text-xl font-black text-gray-900 mb-4 flex items-center gap-2">
+              <span className="text-2xl">⌚</span> Contact Horlogerie
+            </h2>
+            <ContactCards list={horlogerieContacts} />
+          </div>
+
+          {/* Informatique */}
+          <div className="mb-12">
+            <h2 className="text-xl font-black text-gray-900 mb-4 flex items-center gap-2">
+              <span className="text-2xl">💻</span> Contact Informatique
+            </h2>
+            <ContactCards list={informatiqueContacts} />
           </div>
 
           {/* Contact Form */}
