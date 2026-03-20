@@ -142,45 +142,49 @@ export default function HeroSlideForm({ slide, onClose }: HeroSlideFormProps) {
         </div>
 
         <div className="form-group">
-          <label htmlFor="image_file">Image de la bannière *</label>
-          <div className="image-upload-container">
-            <input
-              type="file"
-              id="image_file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              disabled={uploading}
-              style={{ marginBottom: '1rem' }}
-            />
-            {uploading && <p>Upload en cours...</p>}
+          <label>Image de fond de la bannière</label>
+          <div style={{ background: '#f0f4ff', border: '2px dashed #667eea', borderRadius: 10, padding: '1rem', marginBottom: '0.5rem' }}>
+            <p style={{ fontSize: '0.8rem', color: '#4a5568', marginBottom: '0.75rem', fontWeight: 600 }}>
+              📍 Cette image s'affiche en grand fond sur la bannière principale du site.
+            </p>
+            <label style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              background: uploading ? '#a0aec0' : 'linear-gradient(135deg,#667eea,#764ba2)',
+              color: 'white', borderRadius: 8, padding: '14px 20px',
+              fontWeight: 700, fontSize: '1rem', cursor: uploading ? 'not-allowed' : 'pointer',
+              minHeight: 52, width: '100%', boxSizing: 'border-box' as const,
+            }}>
+              {uploading ? '⏳ Upload en cours...' : '🖼️ Choisir une image'}
+              <input type="file" id="image_file" accept="image/*"
+                onChange={handleImageUpload} disabled={uploading}
+                style={{ display: 'none' }} />
+            </label>
             {preview && (
-              <div style={{ marginTop: '1rem' }}>
-                <p style={{ fontSize: '0.875rem', color: '#666', marginBottom: '0.5rem' }}>Aperçu:</p>
-                <img 
-                  src={preview} 
-                  alt="Aperçu" 
-                  style={{ 
-                    maxWidth: '300px', 
-                    maxHeight: '200px', 
-                    borderRadius: '0.5rem',
-                    objectFit: 'cover'
-                  }} 
-                />
+              <div style={{ marginTop: '0.75rem' }}>
+                <p style={{ fontSize: '0.8rem', color: '#22c55e', fontWeight: 700, marginBottom: 6 }}>✅ Image chargée — aperçu :</p>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={preview} alt="Aperçu"
+                  style={{ width: '100%', maxHeight: 140, borderRadius: 8, objectFit: 'cover', border: '2px solid #667eea' }} />
+                <button type="button" onClick={() => { setPreview(''); setFormData(p => ({ ...p, image_url: '' })) }}
+                  style={{ fontSize: '0.75rem', color: '#e53e3e', background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginTop: 6 }}>
+                  ✕ Supprimer l'image
+                </button>
               </div>
             )}
           </div>
         </div>
 
         <div className="form-group">
-          <label htmlFor="video_url">URL de la vidéo</label>
-          <input
-            type="url"
-            id="video_url"
-            name="video_url"
-            value={formData.video_url}
-            onChange={handleChange}
-            placeholder="https://youtube.com/watch?v=xxxxx"
-          />
+          <label htmlFor="video_url">Vidéo de fond (optionnel)</label>
+          <div style={{ background: '#fff7ed', border: '2px dashed #f59e0b', borderRadius: 10, padding: '1rem' }}>
+            <p style={{ fontSize: '0.8rem', color: '#92400e', marginBottom: '0.75rem', fontWeight: 600 }}>
+              📍 La vidéo remplace l'image en fond de la bannière. Colle un lien direct vers un fichier .mp4.
+            </p>
+            <input type="url" id="video_url" name="video_url"
+              value={formData.video_url} onChange={handleChange}
+              placeholder="https://exemple.com/video.mp4"
+              style={{ width: '100%', boxSizing: 'border-box' as const }} />
+          </div>
         </div>
 
         <div className="form-row">

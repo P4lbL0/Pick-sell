@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 
 export const metadata = {
   title: 'Pick Sell — Montres & Informatique',
@@ -12,9 +13,12 @@ export default function Home() {
       {/* ─── NAV ─── */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-950/80 backdrop-blur-md border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <span className="text-xl font-black text-white tracking-tight">
-            <span className="text-amber-400">Pick</span> Sell
-          </span>
+          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition">
+            <Image src="/logo.jpg" alt="Pick Sell" width={32} height={32} className="rounded-lg object-cover" />
+            <span className="text-xl font-black text-white tracking-tight hidden sm:inline">
+              <span className="text-amber-400">Pick</span> Sell
+            </span>
+          </Link>
           <div className="flex items-center gap-1 md:gap-2 text-sm">
             <Link href="/horlogerie" className="px-3 py-1.5 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition hidden sm:inline-block">
               ⌚ Horlogerie

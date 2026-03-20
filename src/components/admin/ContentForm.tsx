@@ -114,57 +114,80 @@ export default function ContentForm({ content, onClose }: ContentFormProps) {
         </div>
 
         {/* ── FOND PERSONNALISÉ ── */}
-        <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #e5e7eb' }}>
-          <h3 style={{ fontWeight: 700, marginBottom: '1rem', color: '#374151' }}>
-            🖼️ Image / Vidéo de fond
+        <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '2px solid #e5e7eb' }}>
+          <h3 style={{ fontWeight: 700, marginBottom: '0.5rem', color: '#374151', fontSize: '1.1rem' }}>
+            🖼️ Image / Vidéo de fond (optionnel)
           </h3>
-          <p style={{ fontSize: '0.85rem', color: '#6b7280', marginBottom: '1rem' }}>
-            Optionnel — si défini, le fond du bloc sera l'image ou la vidéo choisie avec un overlay sombre.
-          </p>
+          <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: '10px 14px', marginBottom: '1rem' }}>
+            <p style={{ fontSize: '0.8rem', color: '#166534', margin: 0, fontWeight: 600 }}>
+              📍 Ce fond s'affiche derrière le texte de ce bloc sur la page du site (ex : section "Notre Concept" en Horlogerie).
+            </p>
+          </div>
 
           <div className="form-group">
             <label>Image de fond</label>
-            {formData.bg_image_url && (
-              <div style={{ marginBottom: '0.5rem' }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={formData.bg_image_url} alt="bg preview"
-                  style={{ height: 80, borderRadius: 6, objectFit: 'cover', border: '1px solid #e5e7eb' }} />
-              </div>
-            )}
-            <input type="text" name="bg_image_url" value={formData.bg_image_url}
-              onChange={handleChange} placeholder="URL de l'image de fond" />
-            <div style={{ marginTop: '0.5rem' }}>
-              <label className="btn btn-secondary" style={{ cursor: 'pointer', fontSize: '0.85rem' }}>
-                {uploading ? 'Upload...' : '📤 Uploader une image'}
+            <div style={{ background: '#f0f4ff', border: '2px dashed #667eea', borderRadius: 10, padding: '1rem' }}>
+              <label style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                background: uploading ? '#a0aec0' : 'linear-gradient(135deg,#667eea,#764ba2)',
+                color: 'white', borderRadius: 8, padding: '14px 20px',
+                fontWeight: 700, fontSize: '0.95rem', cursor: uploading ? 'not-allowed' : 'pointer',
+                minHeight: 52, width: '100%', boxSizing: 'border-box' as const,
+              }}>
+                {uploading ? '⏳ Upload en cours...' : '📤 Choisir une image de fond'}
                 <input type="file" accept="image/*" onChange={handleUploadBg}
                   style={{ display: 'none' }} disabled={uploading} />
               </label>
               {formData.bg_image_url && (
-                <button type="button" className="btn btn-secondary"
-                  style={{ marginLeft: '0.5rem', fontSize: '0.85rem' }}
-                  onClick={() => setFormData(p => ({ ...p, bg_image_url: '' }))}>
-                  ✕ Supprimer
-                </button>
+                <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: 10 }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={formData.bg_image_url} alt="bg preview"
+                    style={{ width: 80, height: 60, borderRadius: 6, objectFit: 'cover', border: '2px solid #667eea' }} />
+                  <div>
+                    <p style={{ fontSize: '0.8rem', color: '#22c55e', fontWeight: 700 }}>✅ Image chargée</p>
+                    <button type="button" onClick={() => setFormData(p => ({ ...p, bg_image_url: '' }))}
+                      style={{ fontSize: '0.75rem', color: '#e53e3e', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+                      ✕ Supprimer
+                    </button>
+                  </div>
+                </div>
               )}
+              {!formData.bg_image_url && (
+                <p style={{ fontSize: '0.75rem', color: '#718096', marginTop: '0.5rem', textAlign: 'center' }}>
+                  ou colle une URL directement :
+                </p>
+              )}
+              <input type="text" name="bg_image_url" value={formData.bg_image_url}
+                onChange={handleChange} placeholder="https://... (URL d'image)"
+                style={{ marginTop: '0.5rem', width: '100%', boxSizing: 'border-box' as const, fontSize: '0.85rem' }} />
             </div>
           </div>
 
           <div className="form-group">
-            <label htmlFor="bg_video_url">Vidéo de fond (URL directe .mp4)</label>
-            <input type="text" id="bg_video_url" name="bg_video_url"
-              value={formData.bg_video_url} onChange={handleChange}
-              placeholder="https://... (remplace l'image si les deux sont définis)" />
+            <label>Vidéo de fond</label>
+            <div style={{ background: '#fff7ed', border: '2px dashed #f59e0b', borderRadius: 10, padding: '1rem' }}>
+              <p style={{ fontSize: '0.8rem', color: '#92400e', marginBottom: '0.75rem', fontWeight: 600 }}>
+                🎥 Si une vidéo ET une image sont définies, la vidéo est prioritaire. Lien direct .mp4 uniquement.
+              </p>
+              <input type="text" id="bg_video_url" name="bg_video_url"
+                value={formData.bg_video_url} onChange={handleChange}
+                placeholder="https://exemple.com/fond.mp4"
+                style={{ width: '100%', boxSizing: 'border-box' as const }} />
+            </div>
           </div>
 
           <div className="form-group">
             <label htmlFor="bg_overlay_opacity">
-              Opacité de l'overlay sombre : {Math.round(Number(formData.bg_overlay_opacity) * 100)}%
+              Assombrissement du fond : <strong>{Math.round(Number(formData.bg_overlay_opacity) * 100)}%</strong>
             </label>
             <input type="range" id="bg_overlay_opacity" name="bg_overlay_opacity"
               min="0" max="0.9" step="0.05"
               value={formData.bg_overlay_opacity} onChange={handleChange}
-              style={{ width: '100%' }} />
-            <small style={{ color: '#888' }}>0% = pas d'overlay, 90% = très sombre</small>
+              style={{ width: '100%', height: 32, cursor: 'pointer' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#888' }}>
+              <span>0% — fond visible</span>
+              <span>90% — très sombre</span>
+            </div>
           </div>
         </div>
 

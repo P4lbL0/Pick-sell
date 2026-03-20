@@ -227,30 +227,35 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
         </div>
 
         <div className="form-group">
-          <label htmlFor="image_file">Image du produit *</label>
-          <div className="image-upload-container">
-            <input
-              type="file"
-              id="image_file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              disabled={uploading}
-              style={{ marginBottom: '1rem' }}
-            />
-            {uploading && <p>Upload en cours...</p>}
+          <label htmlFor="image_file">Photo du produit *</label>
+          <div style={{ background: '#f0f4ff', border: '2px dashed #667eea', borderRadius: 10, padding: '1rem', marginBottom: '0.5rem' }}>
+            <p style={{ fontSize: '0.8rem', color: '#4a5568', marginBottom: '0.75rem', fontWeight: 600 }}>
+              📍 Cette photo apparaît sur la fiche produit et dans la liste des produits.
+            </p>
+            <label style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              background: uploading ? '#a0aec0' : 'linear-gradient(135deg,#667eea,#764ba2)',
+              color: 'white', borderRadius: 8, padding: '14px 20px',
+              fontWeight: 700, fontSize: '1rem', cursor: uploading ? 'not-allowed' : 'pointer',
+              minHeight: 52, width: '100%', boxSizing: 'border-box' as const,
+            }}>
+              {uploading ? '⏳ Upload en cours...' : '📷 Choisir une photo'}
+              <input type="file" id="image_file" accept="image/*"
+                onChange={handleImageUpload} disabled={uploading}
+                style={{ display: 'none' }} />
+            </label>
             {preview && (
-              <div style={{ marginTop: '1rem' }}>
-                <p style={{ fontSize: '0.875rem', color: '#666', marginBottom: '0.5rem' }}>Aperçu:</p>
-                <img 
-                  src={preview} 
-                  alt="Aperçu" 
-                  style={{ 
-                    maxWidth: '200px', 
-                    maxHeight: '200px', 
-                    borderRadius: '0.5rem',
-                    objectFit: 'cover'
-                  }} 
-                />
+              <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: 12 }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={preview} alt="Aperçu"
+                  style={{ width: 80, height: 80, borderRadius: 8, objectFit: 'cover', border: '2px solid #667eea' }} />
+                <div>
+                  <p style={{ fontSize: '0.8rem', color: '#22c55e', fontWeight: 700 }}>✅ Photo chargée</p>
+                  <button type="button" onClick={() => { setPreview(''); setFormData(p => ({ ...p, image_url: '' })) }}
+                    style={{ fontSize: '0.75rem', color: '#e53e3e', background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginTop: 4 }}>
+                    ✕ Supprimer
+                  </button>
+                </div>
               </div>
             )}
           </div>

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { UNIVERSES } from '@/utils/constants'
 import type { ReactNode } from 'react'
 
@@ -20,9 +21,13 @@ export function Header({ universe, children }: HeaderProps) {
           href={`/${universe}`}
           className="flex items-center space-x-2 hover:opacity-70 transition"
         >
-          <div className="w-8 h-8 bg-gradient-to-br from-gray-900 to-gray-700 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">PS</span>
-          </div>
+          <Image
+            src="/logo.jpg"
+            alt="Pick Sell"
+            width={36}
+            height={36}
+            className="rounded-lg object-cover"
+          />
           <span className="font-semibold text-gray-900 hidden sm:inline">
             {universeInfo.label}
           </span>
