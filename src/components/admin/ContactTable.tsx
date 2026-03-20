@@ -14,8 +14,7 @@ const PLATFORM_ICONS: Record<string, string> = {
 }
 
 const UNIVERSE_LABELS: Record<string, { label: string; style: React.CSSProperties }> = {
-  global:       { label: '🌐 Les deux',    style: { background: '#ede9fe', color: '#5b21b6' } },
-  horlogerie:   { label: '⌚ Horlogerie',  style: { background: '#fef3c7', color: '#92400e' } },
+  horlogerie:   { label: '⌚ Horlogerie',   style: { background: '#fef3c7', color: '#92400e' } },
   informatique: { label: '💻 Informatique', style: { background: '#dbeafe', color: '#1e40af' } },
 }
 

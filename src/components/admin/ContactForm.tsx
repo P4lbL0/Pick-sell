@@ -38,7 +38,7 @@ function extractRaw(platform: string, url: string): string {
 export default function ContactForm({ contact, onClose }: ContactFormProps) {
   const [platform, setPlatform] = useState<string>(contact?.platform || 'email')
   const [rawValue, setRawValue] = useState<string>(extractRaw(contact?.platform || 'email', contact?.url || ''))
-  const [universe, setUniverse] = useState<string>(contact?.universe || 'global')
+  const [universe, setUniverse] = useState<string>(contact?.universe || 'horlogerie')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -145,9 +145,8 @@ export default function ContactForm({ contact, onClose }: ContactFormProps) {
           <label>Univers *</label>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             {[
-              { val: 'global',       label: '🌐 Les deux univers' },
-              { val: 'horlogerie',   label: '⌚ Horlogerie seulement' },
-              { val: 'informatique', label: '💻 Informatique seulement' },
+              { val: 'horlogerie',   label: '⌚ Horlogerie' },
+              { val: 'informatique', label: '💻 Informatique' },
             ].map(opt => (
               <button
                 key={opt.val}

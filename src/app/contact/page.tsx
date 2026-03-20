@@ -39,8 +39,8 @@ export default function ContactPage() {
     return url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')
   }
 
-  const horlogerieContacts = contacts.filter(c => c.universe === 'horlogerie' || c.universe === 'global')
-  const informatiqueContacts = contacts.filter(c => c.universe === 'informatique' || c.universe === 'global')
+  const horlogerieContacts = contacts.filter(c => c.universe === 'horlogerie')
+  const informatiqueContacts = contacts.filter(c => c.universe === 'informatique')
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target

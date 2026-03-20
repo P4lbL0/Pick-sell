@@ -52,5 +52,5 @@ ON CONFLICT DO NOTHING;
 
 -- 4. Colonne universe sur contacts (horlogerie / informatique / global)
 ALTER TABLE contacts
-  ADD COLUMN IF NOT EXISTS universe TEXT NOT NULL DEFAULT 'global'
-    CHECK (universe IN ('global', 'horlogerie', 'informatique'));
+  ADD COLUMN IF NOT EXISTS universe TEXT NOT NULL DEFAULT 'horlogerie'
+    CHECK (universe IN ('horlogerie', 'informatique'));
