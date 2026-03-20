@@ -1,5 +1,5 @@
 import { HeroSlider } from '@/components/common/HeroSlider'
-import { ProductGrid } from '@/components/common/ProductGrid'
+import { FilteredProducts } from '@/components/common/FilteredProducts'
 import { ContentSection } from '@/components/common/ContentSection'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
@@ -23,7 +23,7 @@ async function getHeroSlides() {
     const { data, error } = await supabase
       .from('hero_slides')
       .select('*')
-      .eq('universe_type', 'horlogerie')
+      .in('universe_type', ['horlogerie', 'global'])
       .order('order_index', { ascending: true })
     if (error) throw error
     return data || []
@@ -48,9 +48,6 @@ export default async function HorlogerieHome() {
     getConceptBlock(),
   ])
 
-  const seikoProducts = products.filter(p => p.category === 'seiko-mod')
-  const diverseProducts = products.filter(p => p.category === 'diverse')
-  const accessoriesProducts = products.filter(p => p.category === 'accessories')
 
   return (
     <main className="min-h-screen">
@@ -104,61 +101,27 @@ export default async function HorlogerieHome() {
         bgOverlayOpacity={conceptBlock?.bg_overlay_opacity ?? 0.55}
       />
 
-      {/* Collection Seiko MOD */}
+      {/* Produits — avec recherche et filtre par collection */}
       <section className="py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-end justify-between mb-10">
-            <div>
-              <p className="text-amber-600 text-sm font-semibold uppercase tracking-widest mb-1">Collection phare</p>
-              <h2 className="text-3xl md:text-4xl font-black text-gray-900">Seiko MOD</h2>
-              <p className="text-gray-500 mt-2 max-w-lg">Des modifications uniques et soignées de montres Seiko, chaque pièce est unique</p>
-            </div>
+          <div className="mb-10">
+            <p className="text-amber-600 text-sm font-semibold uppercase tracking-widest mb-1">Boutique</p>
+            <h2 className="text-3xl md:text-4xl font-black text-gray-900">Nos Montres & Accessoires</h2>
+            <p className="text-gray-500 mt-2 max-w-lg">
+              Filtrez par collection ou recherchez directement ce que vous cherchez
+            </p>
           </div>
-          {seikoProducts.length === 0 ? (
+          {products.length === 0 ? (
             <div className="py-20 text-center bg-amber-50 rounded-2xl border border-amber-100">
               <div className="text-5xl mb-4">⌚</div>
-              <p className="text-gray-500 text-lg">Aucune montre Seiko MOD disponible pour l'instant</p>
+              <p className="text-gray-500 text-lg">Aucun produit disponible pour l'instant</p>
               <p className="text-gray-400 text-sm mt-2">Revenez bientôt !</p>
             </div>
           ) : (
-            <ProductGrid products={seikoProducts} universe="horlogerie" />
+            <FilteredProducts products={products} universe="horlogerie" />
           )}
         </div>
       </section>
-
-      {/* Collection Diverse */}
-      <section className="py-16 md:py-24 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-end justify-between mb-10">
-            <div>
-              <p className="text-gray-500 text-sm font-semibold uppercase tracking-widest mb-1">Collection</p>
-              <h2 className="text-3xl md:text-4xl font-black text-gray-900">Montres Diverses</h2>
-              <p className="text-gray-500 mt-2 max-w-lg">Montres révisées et reconditionnées avec expertise</p>
-            </div>
-          </div>
-          {diverseProducts.length === 0 ? (
-            <div className="py-20 text-center bg-white rounded-2xl border border-gray-200">
-              <div className="text-5xl mb-4">🕰️</div>
-              <p className="text-gray-500 text-lg">Aucune montre diverse disponible pour l'instant</p>
-            </div>
-          ) : (
-            <ProductGrid products={diverseProducts} universe="horlogerie" />
-          )}
-        </div>
-      </section>
-
-      {/* Accessoires */}
-      {accessoriesProducts.length > 0 && (
-        <section className="py-16 md:py-24">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="mb-10">
-              <p className="text-gray-500 text-sm font-semibold uppercase tracking-widest mb-1">Accessoires</p>
-              <h2 className="text-3xl md:text-4xl font-black text-gray-900">Accessoires Horlogers</h2>
-            </div>
-            <ProductGrid products={accessoriesProducts} universe="horlogerie" />
-          </div>
-        </section>
-      )}
 
       {/* Services */}
       <section className="py-16 md:py-24 bg-amber-950">

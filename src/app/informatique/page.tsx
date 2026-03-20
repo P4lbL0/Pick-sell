@@ -1,5 +1,5 @@
 import { HeroSlider } from '@/components/common/HeroSlider'
-import { ProductGrid } from '@/components/common/ProductGrid'
+import { FilteredProducts } from '@/components/common/FilteredProducts'
 import { ContentSection } from '@/components/common/ContentSection'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
@@ -23,7 +23,7 @@ async function getHeroSlides() {
     const { data, error } = await supabase
       .from('hero_slides')
       .select('*')
-      .eq('universe_type', 'informatique')
+      .in('universe_type', ['informatique', 'global'])
       .order('order_index', { ascending: true })
     if (error) throw error
     return data || []
@@ -48,8 +48,6 @@ export default async function InformatiqueHome() {
     getConceptBlock(),
   ])
 
-  const computerProducts = products.filter(p => p.category === 'computer')
-  const accessoriesProducts = products.filter(p => p.category === 'computer-accessories')
 
   return (
     <main className="min-h-screen">
@@ -103,41 +101,24 @@ export default async function InformatiqueHome() {
         bgOverlayOpacity={conceptBlock?.bg_overlay_opacity ?? 0.55}
       />
 
-      {/* Ordinateurs */}
+      {/* Produits — avec recherche et filtre par collection */}
       <section className="py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4">
           <div className="mb-10">
-            <p className="text-blue-600 text-sm font-semibold uppercase tracking-widest mb-1">Collection</p>
-            <h2 className="text-3xl md:text-4xl font-black text-gray-900">Ordinateurs en Stock</h2>
-            <p className="text-gray-500 mt-2 max-w-lg">Une sélection de portables et tours, tous testés et garantis</p>
+            <p className="text-blue-600 text-sm font-semibold uppercase tracking-widest mb-1">Boutique</p>
+            <h2 className="text-3xl md:text-4xl font-black text-gray-900">Nos Produits</h2>
+            <p className="text-gray-500 mt-2 max-w-lg">
+              Filtrez par collection ou recherchez directement ce que vous cherchez
+            </p>
           </div>
-          {computerProducts.length === 0 ? (
+          {products.length === 0 ? (
             <div className="py-20 text-center bg-slate-50 rounded-2xl border border-slate-200">
               <div className="text-5xl mb-4">💻</div>
-              <p className="text-gray-500 text-lg">Aucun ordinateur disponible pour l'instant</p>
+              <p className="text-gray-500 text-lg">Aucun produit disponible pour l'instant</p>
               <p className="text-gray-400 text-sm mt-2">Revenez bientôt !</p>
             </div>
           ) : (
-            <ProductGrid products={computerProducts} universe="informatique" />
-          )}
-        </div>
-      </section>
-
-      {/* Accessoires */}
-      <section className="py-16 md:py-24 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="mb-10">
-            <p className="text-gray-500 text-sm font-semibold uppercase tracking-widest mb-1">Accessoires</p>
-            <h2 className="text-3xl md:text-4xl font-black text-gray-900">Accessoires Informatique</h2>
-            <p className="text-gray-500 mt-2 max-w-lg">Claviers, souris, câbles et plus</p>
-          </div>
-          {accessoriesProducts.length === 0 ? (
-            <div className="py-20 text-center bg-white rounded-2xl border border-gray-200">
-              <div className="text-5xl mb-4">🖱️</div>
-              <p className="text-gray-500 text-lg">Aucun accessoire disponible pour l'instant</p>
-            </div>
-          ) : (
-            <ProductGrid products={accessoriesProducts} universe="informatique" />
+            <FilteredProducts products={products} universe="informatique" />
           )}
         </div>
       </section>
