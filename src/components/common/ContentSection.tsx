@@ -36,7 +36,10 @@ export function ContentSection({
   const overlayStyle = { backgroundColor: `rgba(0,0,0,${bgOverlayOpacity})` }
 
   return (
-    <section className={`relative py-16 md:py-24 overflow-hidden ${hasBg ? '' : backgroundColor}`}>
+    <section
+      className={`relative py-16 md:py-24 overflow-hidden ${hasBg ? '' : backgroundColor}`}
+      style={hasBg ? undefined : { colorScheme: 'light' }}
+    >
       {/* Video background */}
       {bgVideoUrl && (
         <video
@@ -78,6 +81,7 @@ export function ContentSection({
           )}
           <div
             className={`prose prose-sm md:prose-base max-w-none ${hasBg ? 'prose-invert' : ''}`}
+            style={hasBg ? undefined : { color: '#374151' }}
             dangerouslySetInnerHTML={{ __html: content }}
           />
         </div>

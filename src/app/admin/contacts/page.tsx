@@ -34,17 +34,14 @@ export default function ContactsPage() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Êtes-vous sûr de vouloir suppirmer ce contact ?')) return
-
     try {
-      const { error } = await supabase
-        .from('contacts')
-        .delete()
-        .eq('id', id)
-      if (error) throw error
+      const res = await fetch(`/api/admin/contacts?id=${id}`, { method: 'DELETE' })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Erreur suppression')
       setContacts(contacts.filter(c => c.id !== id))
     } catch (error) {
       console.error('Erreur lors de la suppression:', error)
+      alert('Erreur lors de la suppression : ' + (error instanceof Error ? error.message : 'inconnue'))
     }
   }
 

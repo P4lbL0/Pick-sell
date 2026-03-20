@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState } from 'react'
-import { supabase } from '@/lib/supabase'
 import { Contact } from '@/lib/types'
 
 interface ContactFormProps {
@@ -32,28 +31,29 @@ export default function ContactForm({ contact, onClose }: ContactFormProps) {
     setError('')
 
     try {
-      const payload = {
-        platform: formData.platform,
-        url: formData.url,
-        icon: formData.icon,
-      }
+      const payload = { platform: formData.platform, url: formData.url, icon: formData.icon }
 
       if (contact?.id) {
-        const { error: updateError } = await supabase
-          .from('contacts')
-          .update(payload)
-          .eq('id', contact.id)
-        if (updateError) throw updateError
+        const res = await fetch(`/api/admin/contacts?id=${contact.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        })
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || 'Erreur mise à jour')
       } else {
-        const { error: insertError } = await supabase
-          .from('contacts')
-          .insert([payload])
-        if (insertError) throw insertError
+        const res = await fetch('/api/admin/contacts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        })
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || 'Erreur création')
       }
 
       onClose()
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Erreur inconnue')
     } finally {
       setLoading(false)
     }
