@@ -12,6 +12,8 @@ export default function HeroSlidesPage() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [editingSlide, setEditingSlide] = useState<HeroSlide | null>(null)
+  const [deleteError, setDeleteError] = useState('')
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
 
   useEffect(() => {
     fetchSlides()
@@ -35,23 +37,17 @@ export default function HeroSlidesPage() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cette bannière ?')) return
-
+    setDeleteError('')
     try {
       const slide = slides.find(s => s.id === id)
-      const { error } = await supabase
-        .from('hero_slides')
-        .delete()
-        .eq('id', id)
-      if (error) throw error
+      const res = await fetch(`/api/admin/hero-slides?id=${id}`, { method: 'DELETE' })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Erreur suppression')
       setSlides(slides.filter(s => s.id !== id))
-      
-      // Revalidate the banner pages
-      if (slide) {
-        await revalidateHeroSlides(slide.universe_type)
-      }
-    } catch (error) {
-      console.error('Erreur lors de la suppression:', error)
+      if (slide) await revalidateHeroSlides(slide.universe_type)
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Erreur inconnue'
+      setDeleteError(`Erreur : ${msg}`)
     }
   }
 
@@ -78,8 +74,32 @@ export default function HeroSlidesPage() {
         </button>
       </div>
 
+      {deleteError && (
+        <div className="error-message" style={{ marginBottom: 16 }}>
+          {deleteError}
+          <button onClick={() => setDeleteError('')} style={{ float: 'right', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700 }}>✕</button>
+        </div>
+      )}
+
+      {/* Confirmation suppression inline (pas de window.confirm) */}
+      {confirmDeleteId && (
+        <div style={{ background: '#fff3cd', border: '1px solid #ffc107', borderRadius: 8, padding: '14px 18px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+          <span style={{ fontWeight: 600, color: '#856404' }}>⚠️ Supprimer cette bannière ? Cette action est irréversible.</span>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button className="btn btn-primary" style={{ background: '#dc2626', padding: '8px 16px', fontSize: 13 }}
+              onClick={() => { handleDelete(confirmDeleteId); setConfirmDeleteId(null) }}>
+              Oui, supprimer
+            </button>
+            <button className="btn btn-secondary" style={{ padding: '8px 16px', fontSize: 13 }}
+              onClick={() => setConfirmDeleteId(null)}>
+              Annuler
+            </button>
+          </div>
+        </div>
+      )}
+
       {showForm && (
-        <HeroSlideForm 
+        <HeroSlideForm
           slide={editingSlide}
           onClose={handleFormClose}
         />
@@ -88,10 +108,10 @@ export default function HeroSlidesPage() {
       {loading ? (
         <div className="loading">Chargement des bannières...</div>
       ) : (
-        <HeroSlideTable 
+        <HeroSlideTable
           slides={slides}
           onEdit={handleEdit}
-          onDelete={handleDelete}
+          onDelete={(id) => setConfirmDeleteId(id)}
         />
       )}
     </div>

@@ -1,12 +1,30 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import { supabase } from '@/lib/supabase'
+import { HeroSlider } from '@/components/common/HeroSlider'
+
+export const revalidate = 60
 
 export const metadata = {
   title: 'Pick Sell — Montres & Informatique',
   description: 'Deux univers, une passion. Montres Seiko MOD exclusives, pièces vintage et ordinateurs reconditionnés. Devis réparation et sur-mesure en ligne.',
 }
 
-export default function Home() {
+async function getHomeSlides() {
+  try {
+    const { data, error } = await supabase
+      .from('hero_slides')
+      .select('*')
+      .eq('universe_type', 'global')
+      .order('order_index', { ascending: true })
+    if (error) throw error
+    return data || []
+  } catch { return [] }
+}
+
+export default async function Home() {
+  const homeSlides = await getHomeSlides()
+
   return (
     <main className="min-h-screen bg-gray-950">
 
@@ -32,6 +50,13 @@ export default function Home() {
           </div>
         </div>
       </nav>
+
+      {/* ─── BANNIÈRE ADMIN (si slides configurés) ─── */}
+      {homeSlides.length > 0 && (
+        <div className="pt-[56px]">
+          <HeroSlider slides={homeSlides} autoplay={true} />
+        </div>
+      )}
 
       {/* ─── HERO ─── */}
       <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-4 pt-16 overflow-hidden">
