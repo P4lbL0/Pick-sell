@@ -2,133 +2,144 @@ import { supabase } from '@/lib/supabase'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { formatPrice, CATEGORIES } from '@/utils/constants'
 
-export const revalidate = 60 // ISR: revalidate every 60 seconds
+export const revalidate = 60
 
 async function getProduct(id: string) {
   try {
-    const { data: product, error } = await supabase
+    const { data, error } = await supabase
       .from('products')
       .select('*')
       .eq('id', id)
       .eq('universe', 'informatique')
       .single()
-
-    if (error || !product) {
-      return null
-    }
-    return product
-  } catch (error) {
-    return null
-  }
+    if (error || !data) return null
+    return data
+  } catch { return null }
 }
+
+const CATEGORY_LABELS: Record<string, string> = Object.fromEntries(
+  CATEGORIES.informatique.map(c => [c.id, c.label])
+)
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const product = await getProduct(id)
+  if (!product) notFound()
 
-  if (!product) {
-    notFound()
-  }
-
-  const imageUrl = product.image_url || '/placeholder.jpg'
+  const imageUrl = product.image_url?.trim() || '/placeholder.svg'
+  const categoryLabel = CATEGORY_LABELS[product.category] || product.category
 
   return (
     <main className="min-h-screen bg-white">
       {/* Breadcrumb */}
-      <div className="max-w-7xl mx-auto px-4 py-4">
-        <Link href="/informatique" className="text-blue-600 hover:text-blue-800 underline">
-          ← Retour à la collection
-        </Link>
+      <div className="bg-slate-50 border-b border-slate-100">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <nav className="flex items-center gap-2 text-sm text-gray-500">
+            <Link href="/informatique" className="hover:text-slate-700 transition">Informatique</Link>
+            <span>/</span>
+            <span className="text-slate-700 font-medium">{categoryLabel}</span>
+          </nav>
+        </div>
       </div>
 
       {/* Product Detail */}
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+      <div className="max-w-6xl mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20">
+
           {/* Image */}
-          <div className="flex items-center justify-center bg-gray-100 rounded-lg overflow-hidden aspect-square">
-            <Image
-              src={imageUrl}
-              alt={product.title}
-              width={500}
-              height={500}
-              className="object-cover w-full h-full"
-              priority
-            />
+          <div className="space-y-4">
+            <div className="relative aspect-square bg-gray-100 rounded-2xl overflow-hidden shadow-lg">
+              <Image
+                src={imageUrl}
+                alt={product.title}
+                fill
+                className="object-cover"
+                priority
+                unoptimized={imageUrl.endsWith('.svg')}
+              />
+              {product.stock === 0 && (
+                <div className="absolute inset-0 bg-gray-900/60 flex items-center justify-center">
+                  <span className="bg-white text-gray-900 font-bold px-6 py-3 rounded-xl text-lg">Rupture de stock</span>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Info */}
-          <div className="flex flex-col justify-start">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">{product.title}</h1>
+          <div className="flex flex-col">
+            {/* Tags */}
+            <div className="flex items-center gap-2 mb-4 flex-wrap">
+              <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">
+                {categoryLabel}
+              </span>
+              <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
+                product.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+              }`}>
+                {product.stock > 0 ? `En stock (${product.stock})` : 'Rupture de stock'}
+              </span>
+            </div>
 
-            {/* Price & Stock */}
-            <div className="mb-6 pb-6 border-b border-gray-200">
-              <p className="text-3xl font-bold text-gray-900 mb-3">
-                {product.price.toFixed(2)}€
-              </p>
-              <div className="flex items-center gap-4">
-                <span className={`px-4 py-2 rounded-full font-semibold ${
-                  product.stock > 0 
-                    ? 'bg-green-100 text-green-800' 
-                    : 'bg-red-100 text-red-800'
-                }`}>
-                  {product.stock > 0 ? `En stock (${product.stock})` : 'Rupture de stock'}
-                </span>
-                <span className="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded">
-                  {product.category}
-                </span>
-              </div>
+            <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-4 leading-tight">{product.title}</h1>
+
+            {/* Price */}
+            <div className="mb-6 pb-6 border-b border-gray-100">
+              <p className="text-4xl font-black text-gray-900">{formatPrice(product.price)}</p>
             </div>
 
             {/* Short Description */}
-            <div className="mb-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">Résumé</h2>
-              <p className="text-gray-700 text-lg">{product.short_description}</p>
+            <div className="mb-8">
+              <p className="text-gray-600 text-lg leading-relaxed">{product.short_description}</p>
             </div>
 
-            {/* Features */}
-            <div className="mb-8 p-6 bg-gray-50 rounded-lg">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Univers</h2>
-              <p className="text-gray-700">
-                <span className="font-semibold">Catégorie:</span> {product.category}
-              </p>
-              <p className="text-gray-700 mt-2">
-                <span className="font-semibold">Univers:</span> {product.universe === 'horlogerie' ? '⌚ Horlogerie' : '💻 Informatique'}
-              </p>
+            {/* CTA */}
+            <div className="space-y-3 mt-auto">
+              {product.stock > 0 && product.vinted_url ? (
+                <a
+                  href={product.vinted_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-4 px-6 rounded-xl font-bold text-lg transition bg-teal-600 text-white hover:bg-teal-500 text-center flex items-center justify-center gap-3 shadow-lg shadow-teal-900/20"
+                >
+                  <span>Acheter sur Vinted</span>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
+              ) : (
+                <button disabled className="w-full py-4 rounded-xl font-bold text-lg bg-gray-200 text-gray-400 cursor-not-allowed">
+                  Indisponible
+                </button>
+              )}
+
+              <Link href="/informatique/services/repair" className="w-full py-3 px-6 rounded-xl font-semibold text-base transition bg-blue-50 text-blue-800 hover:bg-blue-100 text-center flex items-center justify-center gap-2 border border-blue-200">
+                🔧 Besoin d'une réparation ?
+              </Link>
             </div>
 
-            {/* CTA Button */}
-            {product.stock > 0 && product.vinted_url ? (
-              <a
-                href={product.vinted_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full py-4 rounded-lg font-bold text-lg transition bg-teal-600 text-white hover:bg-teal-700 text-center block"
-              >
-                Poursuivre sur Vinted
-              </a>
-            ) : (
-              <button
-                className="w-full py-4 rounded-lg font-bold text-lg transition bg-gray-300 text-gray-500 cursor-not-allowed"
-                disabled
-              >
-                Indisponible
-              </button>
-            )}
-
-            {/* Contact */}
-            <p className="text-center text-gray-600 text-sm mt-6">
-              Des questions? <a href="/contact" className="text-blue-600 hover:underline">Contactez-nous</a>
+            <p className="text-center text-gray-400 text-sm mt-6">
+              Des questions ? <a href="/contact" className="text-blue-600 hover:underline font-medium">Contactez-nous</a>
             </p>
           </div>
         </div>
 
         {/* Full Description */}
-        <div className="mt-16 pt-12 border-t border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Description détaillée</h2>
-          <div className="prose max-w-4xl text-lg text-gray-700 leading-relaxed">
-            {product.long_description}
+        {product.long_description && (
+          <div className="mt-16 pt-12 border-t border-gray-100">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Description détaillée</h2>
+            <div
+              className="prose prose-gray max-w-4xl text-lg leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: product.long_description }}
+            />
           </div>
+        )}
+
+        {/* Back */}
+        <div className="mt-12 pt-8 border-t border-gray-100">
+          <Link href="/informatique" className="inline-flex items-center gap-2 text-gray-500 hover:text-slate-700 transition font-medium">
+            ← Retour à la collection
+          </Link>
         </div>
       </div>
     </main>

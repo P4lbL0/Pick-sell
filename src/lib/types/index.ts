@@ -77,8 +77,13 @@ export interface ContentBlock {
   title?: string
   content: string
   universe?: 'horlogerie' | 'informatique' | 'global'
-  createdAt: string
-  updatedAt: string
+  bg_image_url?: string
+  bg_video_url?: string
+  bg_overlay_opacity?: number
+  created_at?: string
+  updated_at?: string
+  createdAt?: string
+  updatedAt?: string
 }
 
 export interface HeroSlide {
