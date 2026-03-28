@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 
 interface ContactInfo {
+  id?: string
   platform: string
   url: string
   universe?: string
