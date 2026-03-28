@@ -262,6 +262,7 @@ export async function getContacts(): Promise<Contact[]> {
       id: String(contact.id),
       platform: contact.platform,
       url: contact.url,
+      universe: contact.universe,
       icon: contact.icon || '',
     }));
   } catch (error) {
