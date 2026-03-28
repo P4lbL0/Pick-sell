@@ -8,15 +8,16 @@ import { revalidateHeroSlides } from '@/app/admin/actions'
 interface HeroSlideFormProps {
   slide?: HeroSlide | null
   onClose: () => void
+  defaultUniverse?: 'horlogerie' | 'informatique' | 'global'
 }
 
-export default function HeroSlideForm({ slide, onClose }: HeroSlideFormProps) {
+export default function HeroSlideForm({ slide, onClose, defaultUniverse = 'horlogerie' }: HeroSlideFormProps) {
   const [formData, setFormData] = useState({
     title: slide?.title || '',
     subtitle: slide?.subtitle || '',
     image_url: slide?.image_url || '',
     video_url: slide?.video_url || '',
-    universe_type: slide?.universe_type || 'global',
+    universe_type: slide?.universe_type || defaultUniverse,
     cta_text: slide?.cta_text || '',
     cta_link: slide?.cta_link || '',
     order_index: slide?.order_index || 0,
@@ -98,7 +99,6 @@ export default function HeroSlideForm({ slide, onClose }: HeroSlideFormProps) {
         if (insertError) throw insertError
       }
 
-      // Revalidate the banner pages
       await revalidateHeroSlides(formData.universe_type)
 
       onClose()
@@ -109,12 +109,69 @@ export default function HeroSlideForm({ slide, onClose }: HeroSlideFormProps) {
     }
   }
 
+  const universeColors: Record<string, string> = {
+    horlogerie: '#92400e',
+    informatique: '#1e3a5f',
+    global: '#374151',
+  }
+  const universeBg: Record<string, string> = {
+    horlogerie: '#fef3c7',
+    informatique: '#dbeafe',
+    global: '#f3f4f6',
+  }
+  const universeLabel: Record<string, string> = {
+    horlogerie: 'Horlogerie uniquement',
+    informatique: 'Informatique uniquement',
+    global: 'Les deux thèmes (global)',
+  }
+
   return (
     <div className="form-container">
       <form onSubmit={handleSubmit} className="admin-form">
         <h2>{slide ? 'Éditer la bannière' : 'Ajouter une bannière'}</h2>
 
         {error && <div className="error-message">{error}</div>}
+
+        {/* Choix du thème EN PREMIER — c'est le plus important */}
+        <div className="form-group">
+          <label htmlFor="universe_type" style={{ fontWeight: 700, fontSize: '1rem' }}>
+            Thème d'affichage *
+          </label>
+          <div style={{
+            background: universeBg[formData.universe_type],
+            border: `2px solid ${universeColors[formData.universe_type]}`,
+            borderRadius: 10,
+            padding: '0.75rem 1rem',
+            marginBottom: '0.25rem',
+          }}>
+            <select
+              id="universe_type"
+              name="universe_type"
+              value={formData.universe_type}
+              onChange={handleChange}
+              required
+              style={{
+                width: '100%',
+                fontWeight: 700,
+                fontSize: '1rem',
+                color: universeColors[formData.universe_type],
+                background: 'transparent',
+                border: 'none',
+                outline: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              <option value="horlogerie">Horlogerie uniquement</option>
+              <option value="informatique">Informatique uniquement</option>
+              <option value="global">Les deux thèmes (global)</option>
+            </select>
+            <p style={{ fontSize: '0.75rem', color: universeColors[formData.universe_type], margin: '4px 0 0', opacity: 0.8 }}>
+              {formData.universe_type === 'global'
+                ? 'Attention : cette bannière s\'affichera sur les deux pages (horlogerie ET informatique).'
+                : `Cette bannière s'affichera uniquement sur la page ${universeLabel[formData.universe_type].split(' ')[0]}.`}
+            </p>
+          </div>
+        </div>
 
         <div className="form-group">
           <label htmlFor="title">Titre *</label>
@@ -145,7 +202,7 @@ export default function HeroSlideForm({ slide, onClose }: HeroSlideFormProps) {
           <label>Image de fond de la bannière</label>
           <div style={{ background: '#f0f4ff', border: '2px dashed #667eea', borderRadius: 10, padding: '1rem', marginBottom: '0.5rem' }}>
             <p style={{ fontSize: '0.8rem', color: '#4a5568', marginBottom: '0.75rem', fontWeight: 600 }}>
-              📍 Cette image s'affiche en grand fond sur la bannière principale du site.
+              Cette image s'affiche en grand fond sur la bannière principale du site.
             </p>
             <label style={{
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
@@ -154,20 +211,20 @@ export default function HeroSlideForm({ slide, onClose }: HeroSlideFormProps) {
               fontWeight: 700, fontSize: '1rem', cursor: uploading ? 'not-allowed' : 'pointer',
               minHeight: 52, width: '100%', boxSizing: 'border-box' as const,
             }}>
-              {uploading ? '⏳ Upload en cours...' : '🖼️ Choisir une image'}
+              {uploading ? 'Upload en cours...' : 'Choisir une image'}
               <input type="file" id="image_file" accept="image/*"
                 onChange={handleImageUpload} disabled={uploading}
                 style={{ display: 'none' }} />
             </label>
             {preview && (
               <div style={{ marginTop: '0.75rem' }}>
-                <p style={{ fontSize: '0.8rem', color: '#22c55e', fontWeight: 700, marginBottom: 6 }}>✅ Image chargée — aperçu :</p>
+                <p style={{ fontSize: '0.8rem', color: '#22c55e', fontWeight: 700, marginBottom: 6 }}>Image chargée — aperçu :</p>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={preview} alt="Aperçu"
                   style={{ width: '100%', maxHeight: 140, borderRadius: 8, objectFit: 'cover', border: '2px solid #667eea' }} />
                 <button type="button" onClick={() => { setPreview(''); setFormData(p => ({ ...p, image_url: '' })) }}
                   style={{ fontSize: '0.75rem', color: '#e53e3e', background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginTop: 6 }}>
-                  ✕ Supprimer l'image
+                  Supprimer l'image
                 </button>
               </div>
             )}
@@ -178,7 +235,7 @@ export default function HeroSlideForm({ slide, onClose }: HeroSlideFormProps) {
           <label htmlFor="video_url">Vidéo de fond (optionnel)</label>
           <div style={{ background: '#fff7ed', border: '2px dashed #f59e0b', borderRadius: 10, padding: '1rem' }}>
             <p style={{ fontSize: '0.8rem', color: '#92400e', marginBottom: '0.75rem', fontWeight: 600 }}>
-              📍 La vidéo remplace l'image en fond de la bannière. Colle un lien direct vers un fichier .mp4.
+              La vidéo remplace l'image en fond de la bannière. Colle un lien direct vers un fichier .mp4.
             </p>
             <input type="url" id="video_url" name="video_url"
               value={formData.video_url} onChange={handleChange}
@@ -187,33 +244,17 @@ export default function HeroSlideForm({ slide, onClose }: HeroSlideFormProps) {
           </div>
         </div>
 
-        <div className="form-row">
-          <div className="form-group">
-            <label htmlFor="universe_type">Univers *</label>
-            <select
-              id="universe_type"
-              name="universe_type"
-              value={formData.universe_type}
-              onChange={handleChange}
-              required
-            >
-              <option value="global">Global</option>
-              <option value="horlogerie">Horlogerie</option>
-              <option value="informatique">Informatique</option>
-            </select>
-          </div>
-          <div className="form-group">
-            <label htmlFor="order_index">Ordre d'affichage *</label>
-            <input
-              type="number"
-              id="order_index"
-              name="order_index"
-              value={formData.order_index}
-              onChange={handleChange}
-              required
-              min="0"
-            />
-          </div>
+        <div className="form-group">
+          <label htmlFor="order_index">Ordre d'affichage *</label>
+          <input
+            type="number"
+            id="order_index"
+            name="order_index"
+            value={formData.order_index}
+            onChange={handleChange}
+            required
+            min="0"
+          />
         </div>
 
         <div className="form-group">
