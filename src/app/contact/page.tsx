@@ -6,6 +6,7 @@ import Link from 'next/link'
 interface ContactInfo {
   platform: string
   url: string
+  universe?: string
 }
 
 export default function ContactPage() {
