@@ -44,6 +44,11 @@ export interface ServiceQuote {
   updated_at: string
 }
 
+export interface ProductDetail extends Product {
+  detailedDescription: string
+  reviews: Review[]
+}
+
 export interface Review {
   id: string
   rating: number

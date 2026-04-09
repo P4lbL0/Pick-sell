@@ -123,9 +123,9 @@ export async function getServicesByType(type: string): Promise<Service[]> {
       description: service.description || '',
       type: service.type,
       images: [],
-      contactUrl: service.contact_url || '',
-      createdAt: service.created_at,
-      updatedAt: service.updated_at,
+      contact_url: service.contact_url || '',
+      created_at: service.created_at,
+      updated_at: service.updated_at,
     }));
   } catch (error) {
     console.error('Error fetching services:', error);
@@ -152,8 +152,8 @@ export async function getContentBlock(key: string): Promise<ContentBlock | null>
       title: data.title || '',
       content: data.content || '',
       universe: data.universe || 'global',
-      createdAt: data.created_at,
-      updatedAt: data.updated_at,
+      created_at: data.created_at,
+      updated_at: data.updated_at,
     };
   } catch (error) {
     console.error('Error fetching content block:', error);
@@ -178,8 +178,8 @@ export async function getContentBlocksByUniverse(
       title: block.title || '',
       content: block.content || '',
       universe: block.universe || 'global',
-      createdAt: block.created_at,
-      updatedAt: block.updated_at,
+      created_at: block.created_at,
+      updated_at: block.updated_at,
     }));
   } catch (error) {
     console.error('Error fetching content blocks by universe:', error);
