@@ -11,7 +11,6 @@ interface ScrollRevealProps {
   delay?: number
   direction?: Direction
   style?: CSSProperties
-  as?: keyof JSX.IntrinsicElements
 }
 
 const directionClass: Record<Direction, string> = {
