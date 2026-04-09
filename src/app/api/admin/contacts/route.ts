@@ -1,17 +1,10 @@
-import { createClient } from '@supabase/supabase-js'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { NextRequest, NextResponse } from 'next/server'
-
-function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
-}
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { error, data } = await getSupabase()
+    const { error, data } = await getSupabaseAdmin()
       .from('contacts')
       .insert([body])
       .select()
@@ -20,7 +13,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(data)
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'Erreur serveur'
-    return NextResponse.json({ error: msg }, { status: 500 })
+    console.error('[contacts] POST error:', msg)
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }
 
@@ -30,7 +24,7 @@ export async function PATCH(request: NextRequest) {
     const id = searchParams.get('id')
     if (!id) return NextResponse.json({ error: 'id requis' }, { status: 400 })
     const body = await request.json()
-    const { error, data } = await getSupabase()
+    const { error, data } = await getSupabaseAdmin()
       .from('contacts')
       .update(body)
       .eq('id', id)
@@ -40,7 +34,8 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json(data)
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'Erreur serveur'
-    return NextResponse.json({ error: msg }, { status: 500 })
+    console.error('[contacts] PATCH error:', msg)
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }
 
@@ -49,7 +44,7 @@ export async function DELETE(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
     if (!id) return NextResponse.json({ error: 'id requis' }, { status: 400 })
-    const { error } = await getSupabase()
+    const { error } = await getSupabaseAdmin()
       .from('contacts')
       .delete()
       .eq('id', id)
@@ -57,6 +52,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ success: true })
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'Erreur serveur'
-    return NextResponse.json({ error: msg }, { status: 500 })
+    console.error('[contacts] DELETE error:', msg)
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }

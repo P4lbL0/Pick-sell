@@ -3,6 +3,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { formatPrice, CATEGORIES } from '@/utils/constants'
+import { getProductColors } from '@/lib/product-helpers'
+import { ProductColors } from '@/components/common/ProductColors'
 
 export const revalidate = 60
 
@@ -19,17 +21,16 @@ async function getProduct(id: string) {
   } catch { return null }
 }
 
-const CATEGORY_LABELS: Record<string, string> = Object.fromEntries(
-  CATEGORIES.informatique.map(c => [c.id, c.label])
-)
-
 export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const product = await getProduct(id)
   if (!product) notFound()
 
-  const imageUrl = product.image_url?.trim() || '/placeholder.svg'
-  const categoryLabel = CATEGORY_LABELS[product.category] || product.category
+  // Fetch product colors
+  const colors = await getProductColors(id)
+
+  const imageUrl = product.image_url?.trim() || '/images/placeholder.jpg'
+  const categoryLabel = CATEGORIES.informatique.find(c => c.id === product.category)?.label || product.category
 
   return (
     <main className="min-h-screen bg-white">
@@ -87,6 +88,9 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             <div className="mb-6 pb-6 border-b border-gray-100">
               <p className="text-4xl font-black text-gray-900">{formatPrice(product.price)}</p>
             </div>
+
+            {/* Product Colors */}
+            {colors && colors.length > 0 && <ProductColors productId={id} colors={colors} />}
 
             {/* Short Description */}
             <div className="mb-8">

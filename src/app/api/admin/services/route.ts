@@ -1,19 +1,12 @@
-import { createClient } from '@supabase/supabase-js'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { NextRequest, NextResponse } from 'next/server'
-
-function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
-}
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const universe = searchParams.get('universe')
 
-    let query = getSupabase().from('services').select('*')
+    let query = getSupabaseAdmin().from('services').select('*')
 
     if (universe) {
       query = query.eq('universe', universe)
@@ -25,8 +18,10 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(data)
   } catch (error: any) {
+    const msg = error instanceof Error ? error.message : 'Erreur serveur'
+    console.error('[services] GET error:', msg)
     return NextResponse.json(
-      { error: error.message },
+      { error: 'Erreur serveur' },
       { status: 500 }
     )
   }
@@ -36,7 +31,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
 
-    const { data, error } = await getSupabase()
+    const { data, error } = await getSupabaseAdmin()
       .from('services')
       .insert([{
         ...body,
@@ -48,8 +43,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(data, { status: 201 })
   } catch (error: any) {
+    const msg = error instanceof Error ? error.message : 'Erreur serveur'
+    console.error('[services] POST error:', msg)
     return NextResponse.json(
-      { error: error.message },
+      { error: 'Erreur serveur' },
       { status: 500 }
     )
   }
@@ -60,7 +57,7 @@ export async function PUT(request: NextRequest) {
     const body = await request.json()
     const { id, ...updateData } = body
 
-    const { data, error } = await getSupabase()
+    const { data, error } = await getSupabaseAdmin()
       .from('services')
       .update({
         ...updateData,
@@ -73,8 +70,10 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json(data)
   } catch (error: any) {
+    const msg = error instanceof Error ? error.message : 'Erreur serveur'
+    console.error('[services] PUT error:', msg)
     return NextResponse.json(
-      { error: error.message },
+      { error: 'Erreur serveur' },
       { status: 500 }
     )
   }
@@ -92,7 +91,7 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    const { error } = await getSupabase()
+    const { error } = await getSupabaseAdmin()
       .from('services')
       .delete()
       .eq('id', id)
@@ -101,8 +100,10 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error: any) {
+    const msg = error instanceof Error ? error.message : 'Erreur serveur'
+    console.error('[services] DELETE error:', msg)
     return NextResponse.json(
-      { error: error.message },
+      { error: 'Erreur serveur' },
       { status: 500 }
     )
   }

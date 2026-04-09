@@ -4,12 +4,12 @@ import { NextRequest, NextResponse } from 'next/server'
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const universe = searchParams.get('universe')
+    const product_id = searchParams.get('product_id')
 
-    let query = getSupabaseAdmin().from('products').select('*')
+    let query = getSupabaseAdmin().from('product_colors').select('*')
 
-    if (universe) {
-      query = query.eq('universe', universe)
+    if (product_id) {
+      query = query.eq('product_id', product_id)
     }
 
     const { data, error } = await query.order('created_at', { ascending: false })
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(data)
   } catch (error: any) {
     const msg = error instanceof Error ? error.message : 'Erreur serveur'
-    console.error('[products] GET error:', msg)
+    console.error('[colors] GET error:', msg)
     return NextResponse.json(
       { error: 'Erreur serveur' },
       { status: 500 }
@@ -32,11 +32,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
 
     const { data, error } = await getSupabaseAdmin()
-      .from('products')
-      .insert([{
-        ...body,
-        created_at: new Date().toISOString(),
-      }])
+      .from('product_colors')
+      .insert([body])
       .select()
 
     if (error) throw error
@@ -44,34 +41,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(data, { status: 201 })
   } catch (error: any) {
     const msg = error instanceof Error ? error.message : 'Erreur serveur'
-    console.error('[products] POST error:', msg)
-    return NextResponse.json(
-      { error: 'Erreur serveur' },
-      { status: 500 }
-    )
-  }
-}
-
-export async function PUT(request: NextRequest) {
-  try {
-    const body = await request.json()
-    const { id, ...updateData } = body
-
-    const { data, error } = await getSupabaseAdmin()
-      .from('products')
-      .update({
-        ...updateData,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', id)
-      .select()
-
-    if (error) throw error
-
-    return NextResponse.json(data)
-  } catch (error: any) {
-    const msg = error instanceof Error ? error.message : 'Erreur serveur'
-    console.error('[products] PUT error:', msg)
+    console.error('[colors] POST error:', msg)
     return NextResponse.json(
       { error: 'Erreur serveur' },
       { status: 500 }
@@ -92,7 +62,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     const { error } = await getSupabaseAdmin()
-      .from('products')
+      .from('product_colors')
       .delete()
       .eq('id', id)
 
@@ -101,7 +71,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ success: true })
   } catch (error: any) {
     const msg = error instanceof Error ? error.message : 'Erreur serveur'
-    console.error('[products] DELETE error:', msg)
+    console.error('[colors] DELETE error:', msg)
     return NextResponse.json(
       { error: 'Erreur serveur' },
       { status: 500 }

@@ -44,11 +44,6 @@ export interface ServiceQuote {
   updated_at: string
 }
 
-export interface ProductDetail extends Product {
-  detailedDescription: string
-  reviews?: Review[]
-}
-
 export interface Review {
   id: string
   rating: number
@@ -66,9 +61,9 @@ export interface Service {
   description: string
   type: 'repair' | 'custom' | 'buyback'
   images?: string[]
-  contactUrl?: string
-  createdAt: string
-  updatedAt: string
+  contact_url?: string
+  created_at: string
+  updated_at?: string
 }
 
 export interface ContentBlock {
@@ -80,10 +75,8 @@ export interface ContentBlock {
   bg_image_url?: string
   bg_video_url?: string
   bg_overlay_opacity?: number
-  created_at?: string
+  created_at: string
   updated_at?: string
-  createdAt?: string
-  updatedAt?: string
 }
 
 export interface HeroSlide {
