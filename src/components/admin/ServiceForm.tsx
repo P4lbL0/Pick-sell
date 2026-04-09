@@ -17,7 +17,7 @@ export default function ServiceForm({ service, onClose }: ServiceFormProps) {
     type: service?.type || 'repair',
     description: service?.description || '',
     images: service?.images?.join(';') || '',
-    contactUrl: service?.contactUrl || '',
+    contactUrl: service?.contact_url || '',
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
