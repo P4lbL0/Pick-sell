@@ -1,6 +1,7 @@
 import { HeroSlider } from '@/components/common/HeroSlider'
 import { FilteredProducts } from '@/components/common/FilteredProducts'
 import { ContentSection } from '@/components/common/ContentSection'
+import { ScrollReveal } from '@/components/common/ScrollReveal'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 
@@ -48,47 +49,79 @@ export default async function HorlogerieHome() {
     getConceptBlock(),
   ])
 
-
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen bg-[#0a0601]">
 
-      {/* Hero Slider — pleine largeur */}
+      {/* ── Hero Slider ou Hero Fallback ── */}
       {heroSlides.length > 0 ? (
         <section className="mb-12 md:mb-16">
           <HeroSlider slides={heroSlides} autoplay={true} />
         </section>
       ) : (
-        <section className="relative bg-gradient-to-br from-amber-950 via-amber-900 to-amber-800 py-28 md:py-40 mb-12 md:mb-16 overflow-hidden">
+        <section className="relative py-32 md:py-44 overflow-hidden">
+
+          {/* Layers de fond */}
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, #0f0500 0%, #1e0900 40%, #2d1200 70%, #1a0800 100%)' }} />
+
+          {/* Grille dorée subtile */}
           <div
-            className="absolute inset-0 opacity-10"
-            style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.4) 1px, transparent 0)', backgroundSize: '28px 28px' }}
+            className="absolute inset-0 opacity-[0.05]"
+            style={{
+              backgroundImage: 'linear-gradient(rgba(251,191,36,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(251,191,36,0.8) 1px, transparent 1px)',
+              backgroundSize: '56px 56px',
+            }}
           />
-          <div className="absolute top-0 left-0 w-96 h-96 bg-amber-600/20 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl" />
-          <div className="relative z-10 max-w-4xl mx-auto px-4 text-center">
-            <p className="text-amber-300 text-sm font-semibold uppercase tracking-widest mb-4">Ssæa Montres</p>
-            <h1 className="text-5xl md:text-7xl font-black text-white mb-6 leading-tight">
-              L'Art de<br />l'Horlogerie
+
+          {/* Orbes de lumière */}
+          <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-amber-600/12 rounded-full -translate-y-1/2 blur-[100px] pointer-events-none anim-float" />
+          <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-amber-400/8 rounded-full translate-y-1/2 blur-[80px] pointer-events-none anim-float" style={{ animationDelay: '2s' }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-px h-64 bg-gradient-to-b from-transparent via-amber-500/30 to-transparent" />
+
+          {/* Cercle décoratif — cadran de montre stylisé */}
+          <div className="absolute right-[5%] top-1/2 -translate-y-1/2 w-64 h-64 md:w-80 md:h-80 rounded-full border border-amber-500/10 hidden md:flex items-center justify-center">
+            <div className="w-52 h-52 md:w-64 md:h-64 rounded-full border border-amber-500/8 flex items-center justify-center">
+              <div className="w-40 h-40 md:w-48 md:h-48 rounded-full border border-amber-500/6 flex items-center justify-center">
+                <span className="text-6xl md:text-7xl opacity-10 anim-float">⌚</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="relative z-10 max-w-4xl mx-auto px-4 text-center md:text-left">
+
+            <div className="anim-fade-in inline-flex items-center gap-2 px-4 py-1.5 border border-amber-500/20 bg-amber-500/5 rounded-full text-amber-400/70 text-xs font-semibold uppercase tracking-[0.2em] mb-8" style={{ animationDelay: '0.1s' }}>
+              <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse" />
+              Ssæa Montres
+            </div>
+
+            <h1 className="anim-fade-up font-black text-white leading-[0.9] tracking-tight mb-6" style={{ fontSize: 'clamp(56px, 10vw, 108px)', animationDelay: '0.2s' }}>
+              L&apos;Art de<br />
+              <span className="anim-shimmer-text">l&apos;Horlogerie</span>
             </h1>
-            <p className="text-amber-100/80 text-xl mb-10 max-w-2xl mx-auto leading-relaxed">
+
+            <div className="anim-fade-in w-20 h-px bg-gradient-to-r from-amber-500/60 to-transparent mb-8 mx-auto md:mx-0" style={{ animationDelay: '0.35s' }} />
+
+            <p className="anim-fade-up text-amber-100/40 text-lg md:text-xl max-w-xl mb-12 mx-auto md:mx-0 leading-relaxed" style={{ animationDelay: '0.4s' }}>
               Montres Seiko MOD exclusives, pièces vintage restaurées, réparations et créations sur-mesure.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+
+            <div className="anim-fade-up flex flex-col sm:flex-row gap-3 justify-center md:justify-start" style={{ animationDelay: '0.55s' }}>
               <Link href="/horlogerie/services/repair">
-                <button className="px-8 py-3 bg-white text-amber-900 font-bold rounded-xl hover:bg-amber-50 transition shadow-lg">
+                <button className="px-7 py-3.5 bg-amber-500 text-amber-950 font-bold rounded-xl hover:bg-amber-400 transition-all duration-300 shadow-lg shadow-amber-900/40 hover:shadow-amber-500/30 hover:-translate-y-0.5 flex items-center gap-2 justify-center text-base">
                   🔧 Réparer ma montre
                 </button>
               </Link>
               <Link href="/horlogerie/services/custom">
-                <button className="px-8 py-3 bg-amber-700/50 text-white font-bold rounded-xl hover:bg-amber-700/70 transition border border-amber-600/50">
+                <button className="px-7 py-3.5 bg-white/5 border border-amber-500/20 text-amber-100/70 font-bold rounded-xl hover:bg-white/8 hover:border-amber-400/40 hover:text-amber-100 transition-all duration-300 hover:-translate-y-0.5 flex items-center gap-2 justify-center text-base">
                   🎨 Créer sur-mesure
                 </button>
               </Link>
             </div>
+
           </div>
         </section>
       )}
 
-      {/* Concept block (éditable depuis l'admin) */}
+      {/* ── Concept block ── */}
       <ContentSection
         title={conceptBlock?.title || 'Notre Concept'}
         subtitle="L'excellence horlogère accessible"
@@ -101,72 +134,90 @@ export default async function HorlogerieHome() {
         bgOverlayOpacity={conceptBlock?.bg_overlay_opacity ?? 0.55}
       />
 
-      {/* Produits — avec recherche et filtre par collection */}
-      <section className="py-16 md:py-24">
+      {/* ── Produits ── */}
+      <section className="py-16 md:py-24 bg-[#0a0601]">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="mb-10">
-            <p className="text-amber-600 text-sm font-semibold uppercase tracking-widest mb-1">Boutique</p>
-            <h2 className="text-3xl md:text-4xl font-black text-gray-900">Nos Montres & Accessoires</h2>
-            <p className="text-gray-500 mt-2 max-w-lg">
+          <ScrollReveal className="mb-10">
+            <p className="text-amber-500/60 text-xs font-semibold uppercase tracking-[0.2em] mb-2">Boutique</p>
+            <h2 className="text-3xl md:text-4xl font-black text-white">Nos Montres & Accessoires</h2>
+            <p className="text-amber-100/30 mt-2 max-w-lg text-sm">
               Filtrez par collection ou recherchez directement ce que vous cherchez
             </p>
-          </div>
+          </ScrollReveal>
+
           {products.length === 0 ? (
-            <div className="py-20 text-center bg-amber-50 rounded-2xl border border-amber-100">
-              <div className="text-5xl mb-4">⌚</div>
-              <p className="text-gray-500 text-lg">Aucun produit disponible pour l'instant</p>
-              <p className="text-gray-400 text-sm mt-2">Revenez bientôt !</p>
-            </div>
+            <ScrollReveal>
+              <div className="py-20 text-center rounded-2xl border border-amber-500/10 bg-amber-500/[0.03]">
+                <div className="text-5xl mb-4 opacity-30">⌚</div>
+                <p className="text-amber-100/30 text-lg">Aucun produit disponible pour l&apos;instant</p>
+                <p className="text-amber-100/20 text-sm mt-2">Revenez bientôt !</p>
+              </div>
+            </ScrollReveal>
           ) : (
             <FilteredProducts products={products} universe="horlogerie" />
           )}
         </div>
       </section>
 
-      {/* Services */}
-      <section className="py-16 md:py-24 bg-amber-950">
+      {/* ── Services ── */}
+      <section className="py-20 md:py-28" style={{ background: 'linear-gradient(180deg, #0a0601 0%, #120800 50%, #0a0601 100%)' }}>
         <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-14">
-            <p className="text-amber-400 text-sm font-semibold uppercase tracking-widest mb-2">Notre expertise</p>
-            <h2 className="text-4xl font-black text-white mb-3">Services Horlogerie</h2>
-            <p className="text-amber-200/70 text-lg max-w-xl mx-auto">Confiez-nous votre montre ou créez la vôtre</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-amber-900/50 border border-amber-700/50 rounded-2xl p-8 hover:bg-amber-900/70 transition group">
-              <div className="text-4xl mb-5">🔧</div>
-              <h3 className="text-2xl font-bold text-white mb-3">Réparation, Restauration &amp; Révision</h3>
-              <p className="text-amber-200/80 mb-6 leading-relaxed">
-                Nettoyage, lubrification, remplacement de pièces, polissage du boîtier, restauration complète. Nous prenons soin de votre montre.
-              </p>
-              <div className="flex gap-2 flex-wrap mb-6">
-                {['Révision', 'Remplacement pièces', 'Restauration', 'Changement pile'].map(t => (
-                  <span key={t} className="px-2 py-0.5 bg-amber-700/40 text-amber-200 text-xs rounded-full border border-amber-600/30">{t}</span>
-                ))}
-              </div>
-              <Link href="/horlogerie/services/repair">
-                <button className="bg-white text-amber-900 px-6 py-3 rounded-lg font-bold hover:bg-amber-50 transition w-full md:w-auto">
-                  Demander un devis →
-                </button>
-              </Link>
-            </div>
+          <ScrollReveal className="text-center mb-14">
+            <p className="text-amber-500/60 text-xs font-semibold uppercase tracking-[0.2em] mb-3">Expertise</p>
+            <h2 className="text-4xl md:text-5xl font-black text-white mb-3">Services Horlogerie</h2>
+            <p className="text-amber-100/30 text-lg max-w-xl mx-auto">Confiez-nous votre montre ou créez la vôtre</p>
+          </ScrollReveal>
 
-            <div className="bg-amber-900/50 border border-amber-700/50 rounded-2xl p-8 hover:bg-amber-900/70 transition group">
-              <div className="text-4xl mb-5">🎨</div>
-              <h3 className="text-2xl font-bold text-white mb-3">Montre Personnalisée / Sur-mesure</h3>
-              <p className="text-amber-200/80 mb-6 leading-relaxed">
-                Choisissez chaque détail : cadran, aiguilles, lunette, crystal saphir, bracelet... Une pièce unique à votre image.
-              </p>
-              <div className="flex gap-2 flex-wrap mb-6">
-                {['Cadran custom', 'Aiguilles', 'Bezel', 'Crystal saphir'].map(t => (
-                  <span key={t} className="px-2 py-0.5 bg-amber-700/40 text-amber-200 text-xs rounded-full border border-amber-600/30">{t}</span>
-                ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+            <ScrollReveal delay={100} direction="left">
+              <div className="relative overflow-hidden rounded-2xl p-8 md:p-10 group hover:-translate-y-1 transition-all duration-300" style={{ background: 'linear-gradient(135deg, #1a0900 0%, #2d1200 100%)' }}>
+                <div className="absolute inset-0 rounded-2xl ring-1 ring-amber-500/15 group-hover:ring-amber-400/30 transition-all duration-500" />
+                <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/8 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:bg-amber-500/15 transition-all duration-700" />
+                <div className="relative z-10">
+                  <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-2xl mb-6 ring-1 ring-amber-400/15">🔧</div>
+                  <h3 className="text-2xl font-bold text-white mb-3">Réparation, Restauration & Révision</h3>
+                  <p className="text-amber-100/40 mb-6 leading-relaxed text-sm">
+                    Nettoyage, lubrification, remplacement de pièces, polissage du boîtier, restauration complète.
+                  </p>
+                  <div className="flex gap-2 flex-wrap mb-8">
+                    {['Révision', 'Remplacement pièces', 'Restauration', 'Changement pile'].map(t => (
+                      <span key={t} className="px-2.5 py-1 bg-amber-500/8 text-amber-300/50 text-xs rounded-full border border-amber-500/10">{t}</span>
+                    ))}
+                  </div>
+                  <Link href="/horlogerie/services/repair">
+                    <button className="bg-amber-500 text-amber-950 px-6 py-3 rounded-xl font-bold hover:bg-amber-400 transition-all duration-300 text-sm shadow-lg shadow-amber-900/30">
+                      Demander un devis →
+                    </button>
+                  </Link>
+                </div>
               </div>
-              <Link href="/horlogerie/services/custom">
-                <button className="bg-white text-amber-900 px-6 py-3 rounded-lg font-bold hover:bg-amber-50 transition w-full md:w-auto">
-                  Commander →
-                </button>
-              </Link>
-            </div>
+            </ScrollReveal>
+
+            <ScrollReveal delay={200} direction="right">
+              <div className="relative overflow-hidden rounded-2xl p-8 md:p-10 group hover:-translate-y-1 transition-all duration-300" style={{ background: 'linear-gradient(135deg, #1a0900 0%, #2d1200 100%)' }}>
+                <div className="absolute inset-0 rounded-2xl ring-1 ring-amber-500/15 group-hover:ring-amber-400/30 transition-all duration-500" />
+                <div className="absolute bottom-0 left-0 w-48 h-48 bg-amber-600/8 rounded-full translate-y-1/2 -translate-x-1/2 blur-2xl group-hover:bg-amber-600/15 transition-all duration-700" />
+                <div className="relative z-10">
+                  <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-2xl mb-6 ring-1 ring-amber-400/15">🎨</div>
+                  <h3 className="text-2xl font-bold text-white mb-3">Montre Personnalisée / Sur-mesure</h3>
+                  <p className="text-amber-100/40 mb-6 leading-relaxed text-sm">
+                    Choisissez chaque détail : cadran, aiguilles, lunette, crystal saphir, bracelet... Une pièce unique.
+                  </p>
+                  <div className="flex gap-2 flex-wrap mb-8">
+                    {['Cadran custom', 'Aiguilles', 'Bezel', 'Crystal saphir'].map(t => (
+                      <span key={t} className="px-2.5 py-1 bg-amber-500/8 text-amber-300/50 text-xs rounded-full border border-amber-500/10">{t}</span>
+                    ))}
+                  </div>
+                  <Link href="/horlogerie/services/custom">
+                    <button className="bg-amber-500 text-amber-950 px-6 py-3 rounded-xl font-bold hover:bg-amber-400 transition-all duration-300 text-sm shadow-lg shadow-amber-900/30">
+                      Commander →
+                    </button>
+                  </Link>
+                </div>
+              </div>
+            </ScrollReveal>
+
           </div>
         </div>
       </section>
