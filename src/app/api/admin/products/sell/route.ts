@@ -43,10 +43,10 @@ export async function POST(request: NextRequest) {
 
     if (error) throw error
     return NextResponse.json({ ok: true, product: data })
-  } catch (error) {
-    const msg = error instanceof Error ? error.message : 'Erreur serveur'
+  } catch (error: any) {
     console.error('[products/sell] POST error:', error)
-    return NextResponse.json({ error: msg }, { status: 500 })
+    const msg = error?.message || error?.hint || error?.details || error?.code || 'Erreur serveur'
+    return NextResponse.json({ error: msg, raw: error }, { status: 500 })
   }
 }
 
