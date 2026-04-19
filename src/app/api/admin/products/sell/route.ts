@@ -35,7 +35,6 @@ export async function POST(request: NextRequest) {
         sold_price: Number.isFinite(price) ? price : null,
         sold_channel: channel,
         stock: 0,
-        updated_at: new Date().toISOString(),
       })
       .eq('id', id)
       .select()
@@ -62,7 +61,6 @@ export async function DELETE(request: NextRequest) {
         sold_at: null,
         sold_price: null,
         sold_channel: null,
-        updated_at: new Date().toISOString(),
       })
       .eq('id', id)
 
