@@ -40,7 +40,7 @@ export function ProductColors({ productId, colors }: ProductColorsProps) {
             <div
               className="w-16 h-16 mx-auto rounded-lg border-2 border-gray-300 mb-2"
               style={{ backgroundColor: color.hex_color }}
-              title={`#${color.hex_color}`}
+              title={color.hex_color}
             />
             <p className="text-sm font-medium truncate">{color.name}</p>
             <p className="text-xs text-gray-600">

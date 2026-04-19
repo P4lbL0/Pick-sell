@@ -10,6 +10,7 @@ const navItems = [
     section: 'Gestion',
     links: [
       { href: '/admin', label: 'Tableau de bord', icon: '📊' },
+      { href: '/admin/stats', label: 'Statistiques & ventes', icon: '📈' },
       { href: '/admin/products', label: 'Produits', icon: '📦' },
       { href: '/admin/colors', label: 'Coloris', icon: '🎨' },
       { href: '/admin/services', label: 'Services', icon: '🔧' },

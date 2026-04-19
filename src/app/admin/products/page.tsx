@@ -101,10 +101,11 @@ export default function ProductsPage() {
       {loading ? (
         <div className="loading">Chargement des produits...</div>
       ) : (
-        <ProductTable 
+        <ProductTable
           products={products}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          onChanged={fetchProducts}
         />
       )}
     </div>

@@ -3,15 +3,19 @@
  */
 
 import { ProductColor } from '@/lib/types'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 export async function getProductColors(
   productId: string
 ): Promise<ProductColor[]> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-    const res = await fetch(`${baseUrl}/api/admin/colors?product_id=${productId}`)
-    if (!res.ok) return []
-    return await res.json()
+    const { data, error } = await getSupabaseAdmin()
+      .from('product_colors')
+      .select('*')
+      .eq('product_id', productId)
+      .order('created_at', { ascending: false })
+    if (error) throw error
+    return data ?? []
   } catch (error) {
     console.error('Error fetching product colors:', error)
     return []

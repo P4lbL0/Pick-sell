@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Product } from '@/lib/types'
 import { formatPrice } from '@/utils/constants'
+import { track } from '@/lib/track'
 
 interface ProductCardProps {
   product: Product
@@ -13,8 +14,17 @@ interface ProductCardProps {
 export function ProductCard({ product, universe }: ProductCardProps) {
   const imageUrl = product.image_url && product.image_url.trim() ? product.image_url : '/placeholder.jpg'
 
+  const handleClick = () => {
+    track({
+      event_type: 'view_product',
+      product_id: product.id,
+      universe,
+      metadata: { title: product.title, category: product.category, from: 'card' },
+    })
+  }
+
   return (
-    <Link href={`/${universe}/products/${product.id}`}>
+    <Link href={`/${universe}/products/${product.id}`} onClick={handleClick}>
       <div className="group bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
         {/* Image Container */}
         <div className="relative w-full aspect-square bg-gray-100 overflow-hidden">

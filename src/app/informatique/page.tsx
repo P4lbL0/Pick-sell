@@ -2,8 +2,9 @@ import { HeroSlider } from '@/components/common/HeroSlider'
 import { FilteredProducts } from '@/components/common/FilteredProducts'
 import { ContentSection } from '@/components/common/ContentSection'
 import { ScrollReveal } from '@/components/common/ScrollReveal'
+import { TrackPageView } from '@/components/common/TrackPageView'
+import { ServiceLink } from '@/components/common/ServiceLink'
 import { supabase } from '@/lib/supabase'
-import Link from 'next/link'
 
 export const revalidate = 60
 
@@ -50,7 +51,8 @@ export default async function InformatiqueHome() {
   ])
 
   return (
-    <main className="min-h-screen bg-[#010810]">
+    <main className="min-h-screen bg-white">
+      <TrackPageView universe="informatique" />
 
       {/* ── Hero Slider ou Hero Fallback ── */}
       {heroSlides.length > 0 ? (
@@ -116,16 +118,16 @@ export default async function InformatiqueHome() {
             </p>
 
             <div className="anim-fade-up flex flex-col sm:flex-row gap-3 justify-center md:justify-end" style={{ animationDelay: '0.55s' }}>
-              <Link href="/informatique/services/repair">
+              <ServiceLink href="/informatique/services/repair" universe="informatique" serviceType="repair" className="inline-block">
                 <button className="px-7 py-3.5 bg-blue-500 text-white font-bold rounded-xl hover:bg-blue-400 transition-all duration-300 shadow-lg shadow-blue-900/40 hover:shadow-blue-500/30 hover:-translate-y-0.5 flex items-center gap-2 justify-center text-base">
                   🔧 Réparer mon PC
                 </button>
-              </Link>
-              <Link href="/informatique/services/buyback">
+              </ServiceLink>
+              <ServiceLink href="/informatique/services/buyback" universe="informatique" serviceType="buyback" className="inline-block">
                 <button className="px-7 py-3.5 bg-white/5 border border-blue-500/20 text-blue-100/60 font-bold rounded-xl hover:bg-white/8 hover:border-blue-400/40 hover:text-blue-100 transition-all duration-300 hover:-translate-y-0.5 flex items-center gap-2 justify-center text-base">
                   ♻️ Faire reprendre mon PC
                 </button>
-              </Link>
+              </ServiceLink>
             </div>
 
           </div>
@@ -146,22 +148,22 @@ export default async function InformatiqueHome() {
       />
 
       {/* ── Produits ── */}
-      <section className="py-16 md:py-24 bg-[#010810]">
+      <section className="py-16 md:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4">
           <ScrollReveal className="mb-10">
-            <p className="text-blue-500/60 text-xs font-semibold uppercase tracking-[0.2em] mb-2">Boutique</p>
-            <h2 className="text-3xl md:text-4xl font-black text-white">Nos Produits</h2>
-            <p className="text-blue-100/30 mt-2 max-w-lg text-sm">
+            <p className="text-blue-600 text-xs font-semibold uppercase tracking-[0.2em] mb-2">Boutique</p>
+            <h2 className="text-3xl md:text-4xl font-black text-gray-900">Nos Produits</h2>
+            <p className="text-gray-500 mt-2 max-w-lg text-sm">
               Filtrez par collection ou recherchez directement ce que vous cherchez
             </p>
           </ScrollReveal>
 
           {products.length === 0 ? (
             <ScrollReveal>
-              <div className="py-20 text-center rounded-2xl border border-blue-500/10 bg-blue-500/[0.03]">
-                <div className="text-5xl mb-4 opacity-30">💻</div>
-                <p className="text-blue-100/30 text-lg">Aucun produit disponible pour l&apos;instant</p>
-                <p className="text-blue-100/20 text-sm mt-2">Revenez bientôt !</p>
+              <div className="py-20 text-center rounded-2xl border border-blue-200 bg-blue-50">
+                <div className="text-5xl mb-4 opacity-40">💻</div>
+                <p className="text-gray-600 text-lg">Aucun produit disponible pour l&apos;instant</p>
+                <p className="text-gray-400 text-sm mt-2">Revenez bientôt !</p>
               </div>
             </ScrollReveal>
           ) : (
@@ -171,7 +173,7 @@ export default async function InformatiqueHome() {
       </section>
 
       {/* ── Services ── */}
-      <section className="py-20 md:py-28" style={{ background: 'linear-gradient(180deg, #010810 0%, #030f1e 50%, #010810 100%)' }}>
+      <section className="py-20 md:py-28" style={{ background: 'linear-gradient(180deg, #030712 0%, #0a0f1f 50%, #030712 100%)' }}>
         <div className="max-w-7xl mx-auto px-4">
           <ScrollReveal className="text-center mb-14">
             <p className="text-blue-500/60 text-xs font-semibold uppercase tracking-[0.2em] mb-3">Expertise</p>
@@ -196,11 +198,11 @@ export default async function InformatiqueHome() {
                       <span key={t} className="px-2.5 py-1 bg-blue-500/8 text-blue-300/50 text-xs rounded-full border border-blue-500/10">{t}</span>
                     ))}
                   </div>
-                  <Link href="/informatique/services/repair">
+                  <ServiceLink href="/informatique/services/repair" universe="informatique" serviceType="repair" className="inline-block">
                     <button className="bg-blue-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-400 transition-all duration-300 text-sm shadow-lg shadow-blue-900/30">
                       Demander un devis →
                     </button>
-                  </Link>
+                  </ServiceLink>
                 </div>
               </div>
             </ScrollReveal>
@@ -220,11 +222,11 @@ export default async function InformatiqueHome() {
                       <span key={t} className="px-2.5 py-1 bg-blue-500/8 text-blue-300/50 text-xs rounded-full border border-blue-500/10">{t}</span>
                     ))}
                   </div>
-                  <Link href="/informatique/services/buyback">
+                  <ServiceLink href="/informatique/services/buyback" universe="informatique" serviceType="buyback" className="inline-block">
                     <button className="bg-blue-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-400 transition-all duration-300 text-sm shadow-lg shadow-blue-900/30">
                       Demander une estimation →
                     </button>
-                  </Link>
+                  </ServiceLink>
                 </div>
               </div>
             </ScrollReveal>

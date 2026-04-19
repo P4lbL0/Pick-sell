@@ -14,6 +14,9 @@ export interface Product {
   image_url: string
   vinted_url?: string
   created_at: string
+  sold_at?: string | null
+  sold_price?: number | null
+  sold_channel?: 'vinted' | 'direct' | 'autre' | null
 }
 
 export interface ProductColor {

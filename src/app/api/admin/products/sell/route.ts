@@ -1,0 +1,69 @@
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { NextRequest, NextResponse } from 'next/server'
+
+const ALLOWED_CHANNELS = new Set(['vinted', 'direct', 'autre'])
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json().catch(() => ({}))
+    const { id, sold_price, sold_channel } = body as {
+      id?: string
+      sold_price?: number | string
+      sold_channel?: string
+    }
+
+    if (!id) {
+      return NextResponse.json({ error: 'id requis' }, { status: 400 })
+    }
+
+    const channel = sold_channel && ALLOWED_CHANNELS.has(sold_channel) ? sold_channel : 'vinted'
+    const price = sold_price !== undefined && sold_price !== null && sold_price !== ''
+      ? Number(sold_price)
+      : null
+
+    const { data, error } = await getSupabaseAdmin()
+      .from('products')
+      .update({
+        sold_at: new Date().toISOString(),
+        sold_price: Number.isFinite(price) ? price : null,
+        sold_channel: channel,
+        stock: 0,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) throw error
+    return NextResponse.json({ ok: true, product: data })
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : 'Erreur serveur'
+    console.error('[products/sell] POST error:', msg)
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+    if (!id) return NextResponse.json({ error: 'id requis' }, { status: 400 })
+
+    const { error } = await getSupabaseAdmin()
+      .from('products')
+      .update({
+        sold_at: null,
+        sold_price: null,
+        sold_channel: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', id)
+
+    if (error) throw error
+    return NextResponse.json({ ok: true })
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : 'Erreur serveur'
+    console.error('[products/sell] DELETE error:', msg)
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+  }
+}

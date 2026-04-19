@@ -26,7 +26,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ data })
   } catch (err: unknown) {
     console.error('[admin/quote-requests] GET error', err)
-    return NextResponse.json({ error: (err as Error).message ?? 'server error' }, { status: 500 })
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }
 
@@ -44,6 +44,6 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ success: true })
   } catch (err: unknown) {
     console.error('[admin/quote-requests] PATCH error', err)
-    return NextResponse.json({ error: (err as Error).message ?? 'server error' }, { status: 500 })
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }

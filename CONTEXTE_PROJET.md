@@ -1,5 +1,5 @@
 # CONTEXTE PROJET — Pick Sell
-> Fichier mis à jour à chaque modification. Dernière MAJ : 2026-03-20
+> Fichier mis à jour à chaque modification. Dernière MAJ : 2026-04-19
 
 ---
 
@@ -60,6 +60,8 @@ pick-sell/
 | `service_quotes` | Grilles tarifaires | ⚠️ Table créée, admin présent mais non reliée au front |
 | `reviews` | Avis clients | ❌ Table créée, JAMAIS utilisée |
 | `contacts` | Infos contact (email/WA/etc.) | ⚠️ Admin OK mais page contact ne l'utilise pas |
+| `product_events` | Tracking clics & visites (V3) | ✅ Insertion publique, lecture admin — alimente `/admin/stats` |
+| `products.sold_*` | Colonnes `sold_at`, `sold_price`, `sold_channel` | ✅ Marquage vente manuelle depuis admin |
 
 ### Storage Supabase
 - **Bucket** : `products`
@@ -194,6 +196,18 @@ NEXT_PUBLIC_CONTACT_EMAIL=contact@picksel.com                      ← À mettre
 | 2026-03-20 | **Types** : ContentBlock mis à jour avec bg fields | `lib/types/index.ts` |
 | 2026-03-20 | **Favicon** : IMG_4018.jpeg copié en `src/app/icon.jpeg` (favicon onglet navigateur) | `src/app/icon.jpeg` |
 | 2026-03-20 | **Fix SQL** : guillemets doubles → simples dans SUPABASE_MIGRATION_V2.sql | `SUPABASE_MIGRATION_V2.sql` |
+| 2026-04-09 | **Nettoyage code mort** : suppression `useSupabase.ts`, `StickyHero.tsx`, `hooks/index.ts` (hooks Strapi obsolètes, jamais utilisés) | `src/hooks/`, `src/components/common/StickyHero.tsx` |
+| 2026-04-09 | **Fix sécurité** : `api/admin/quote-requests/route.ts` — message d'erreur interne ne s'expose plus au client | `src/app/api/admin/quote-requests/route.ts` |
+| 2026-04-09 | **Fix critique** : `getProductColors` ne fait plus de HTTP fetch (échoue en prod), requête directe Supabase à la place | `src/lib/product-helpers.ts` |
+| 2026-04-09 | **Fix cosmétique** : tooltip couleur affichait `##ff0000` (double #) → corrigé | `src/components/common/ProductColors.tsx` |
+| 2026-04-09 | **Nettoyage MD** : suppression de 15 fichiers d'audit redondants générés par Copilot (AUDIT_COMPLET, BUGS_PAR_FICHIER, PROBLEMES_CRITIQUES_TROUVES, RESUME_EXECUTIVE, RAPPORT_FINAL, CHANGEMENTS_IMPLEMENTES, CODEBASE_ANALYSIS, INDEX, COMMANDS, FIXES_RAPIDES, ENV_SETUP, SETUP_SUMMARY, SUPABASE_QUICKSTART, ADMIN_GUIDE, ARCHITECTURE) | racine du projet |
+| 2026-04-19 | **Fond unifié** horlogerie/informatique → `bg-white` (main + section produits), textes adaptés (gray-900/gray-500) — sections hero/services gardent leur fond sombre (self-contained) | `src/app/horlogerie/page.tsx`, `src/app/informatique/page.tsx` |
+| 2026-04-19 | **Fix SQL V3** : FK `product_events.product_id` → `BIGINT` (table `products.id` est `bigint`, pas `uuid`) | `SUPABASE_MIGRATION_V3.sql` |
+| 2026-04-19 | **Système de tracking clics/visites** : table `product_events` + API POST `/api/track` + helper `lib/track.ts` (sendBeacon/fetch) + composants `TrackPageView`, `VintedButton`, `ServiceLink` | `SUPABASE_MIGRATION_V3.sql`, `src/app/api/track/route.ts`, `src/lib/track.ts`, `src/components/common/TrackPageView.tsx`, `VintedButton.tsx`, `ServiceLink.tsx` |
+| 2026-04-19 | **Tracking branché** sur landing, horlogerie, informatique, fiches produit (view_product + click_vinted + click_service), cartes produits | `src/app/page.tsx`, `horlogerie/page.tsx`, `informatique/page.tsx`, `*/products/[id]/page.tsx`, `components/common/ProductCard.tsx` |
+| 2026-04-19 | **Dashboard stats admin** `/admin/stats` : overview, timeline 7/30/90/365 j, top produits, ventes, répartition par univers, events récents | `src/app/admin/stats/page.tsx`, `src/app/api/admin/stats/route.ts` |
+| 2026-04-19 | **Marquage vente** : API `/api/admin/products/sell` + modal dans `ProductTable` (prix + canal vinted/direct/autre), stock auto → 0, annulation possible | `src/app/api/admin/products/sell/route.ts`, `src/components/admin/ProductTable.tsx`, `src/lib/types/index.ts` |
+| 2026-04-19 | **Sidebar admin** : ajout lien "Statistiques & ventes" | `src/app/admin/layout.tsx` |
 
 ---
 
@@ -203,6 +217,11 @@ NEXT_PUBLIC_CONTACT_EMAIL=contact@picksel.com                      ← À mettre
 - Ajoute les colonnes `bg_image_url`, `bg_video_url`, `bg_overlay_opacity` à `content_blocks`
 - Crée la table `contact_messages`
 - Seed les blocs de contenu par défaut
+
+**Exécuter `SUPABASE_MIGRATION_V3.sql` dans Supabase > SQL Editor** (tracking & ventes)
+- Crée la table `product_events` + index + policies RLS (insert public, select admin)
+- Ajoute `sold_at`, `sold_price`, `sold_channel` à `products`
+- Sans cette migration, `/admin/stats` et le bouton "Marquer comme vendu" échoueront silencieusement
 
 ---
 

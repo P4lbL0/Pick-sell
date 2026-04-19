@@ -5,6 +5,9 @@ import { notFound } from 'next/navigation'
 import { formatPrice, CATEGORIES } from '@/utils/constants'
 import { getProductColors, getCategoryLabel as getLabel } from '@/lib/product-helpers'
 import { ProductColors } from '@/components/common/ProductColors'
+import { TrackPageView } from '@/components/common/TrackPageView'
+import { VintedButton } from '@/components/common/VintedButton'
+import { ServiceLink } from '@/components/common/ServiceLink'
 
 export const revalidate = 60
 
@@ -34,6 +37,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
   return (
     <main className="min-h-screen bg-white">
+      <TrackPageView universe="horlogerie" productId={id} event="view_product" />
       {/* Breadcrumb */}
       <div className="bg-amber-50 border-b border-amber-100">
         <div className="max-w-7xl mx-auto px-4 py-3">
@@ -100,26 +104,22 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             {/* CTA */}
             <div className="space-y-3 mt-auto">
               {product.stock > 0 && product.vinted_url ? (
-                <a
-                  href={product.vinted_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full py-4 px-6 rounded-xl font-bold text-lg transition bg-teal-600 text-white hover:bg-teal-500 text-center flex items-center justify-center gap-3 shadow-lg shadow-teal-900/20"
-                >
-                  <span>Acheter</span>
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                </a>
+                <VintedButton href={product.vinted_url} productId={id} universe="horlogerie" title={product.title} />
               ) : (
                 <button disabled className="w-full py-4 rounded-xl font-bold text-lg bg-gray-200 text-gray-400 cursor-not-allowed">
                   Indisponible
                 </button>
               )}
 
-              <Link href="/horlogerie/services/repair" className="w-full py-3 px-6 rounded-xl font-semibold text-base transition bg-amber-50 text-amber-800 hover:bg-amber-100 text-center flex items-center justify-center gap-2 border border-amber-200">
-                🔧 Besoin d'une réparation ?
-              </Link>
+              <ServiceLink
+                href="/horlogerie/services/repair"
+                universe="horlogerie"
+                serviceType="repair"
+                productId={id}
+                className="w-full py-3 px-6 rounded-xl font-semibold text-base transition bg-amber-50 text-amber-800 hover:bg-amber-100 text-center flex items-center justify-center gap-2 border border-amber-200"
+              >
+                🔧 Besoin d&apos;une réparation ?
+              </ServiceLink>
             </div>
 
             <p className="text-center text-gray-400 text-sm mt-6">

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { ScrollReveal } from '@/components/common/ScrollReveal'
+import { TrackPageView } from '@/components/common/TrackPageView'
 
 export const metadata = {
   title: 'Pick Sell — Montres & Informatique',
@@ -85,6 +86,7 @@ const VALUES = [
 export default function Home() {
   return (
     <main className="min-h-screen bg-[#030712] overflow-x-hidden">
+      <TrackPageView universe="global" />
 
       {/* ─── NAV ─── */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-[#030712]/80 backdrop-blur-xl border-b border-white/[0.06]">
