@@ -55,19 +55,28 @@ interface StatsData {
   }>
 }
 
+interface ProductLite {
+  id: string | number
+  title: string
+  price: number
+  universe: string
+  category: string
+  sold_at: string | null
+}
+
 const RANGES = [
-  { v: 7, label: '7 jours' },
-  { v: 30, label: '30 jours' },
-  { v: 90, label: '90 jours' },
+  { v: 7, label: '7 j' },
+  { v: 30, label: '30 j' },
+  { v: 90, label: '90 j' },
   { v: 365, label: '1 an' },
 ]
 
 const EVENT_LABELS: Record<string, { label: string; color: string }> = {
-  view_page: { label: 'Visite page', color: '#60a5fa' },
-  view_product: { label: 'Fiche produit', color: '#a78bfa' },
-  click_vinted: { label: 'Clic Vinted', color: '#10b981' },
-  click_service: { label: 'Clic service', color: '#f59e0b' },
-  click_cta: { label: 'Clic CTA', color: '#6b7280' },
+  view_page: { label: 'Visite', color: '#60a5fa' },
+  view_product: { label: 'Fiche', color: '#a78bfa' },
+  click_vinted: { label: 'Vinted', color: '#10b981' },
+  click_service: { label: 'Service', color: '#f59e0b' },
+  click_cta: { label: 'CTA', color: '#6b7280' },
 }
 
 function fmtEur(n: number) {
@@ -83,6 +92,17 @@ export default function StatsPage() {
   const [loading, setLoading] = useState(true)
   const [days, setDays] = useState(30)
   const [err, setErr] = useState<string | null>(null)
+
+  // ── Modal "Ajouter une vente" ────────────────────────────
+  const [addOpen, setAddOpen] = useState(false)
+  const [products, setProducts] = useState<ProductLite[]>([])
+  const [productsLoading, setProductsLoading] = useState(false)
+  const [selectedId, setSelectedId] = useState('')
+  const [soldDate, setSoldDate] = useState(() => new Date().toISOString().slice(0, 10))
+  const [soldPrice, setSoldPrice] = useState('')
+  const [soldChannel, setSoldChannel] = useState<'vinted' | 'direct' | 'autre'>('vinted')
+  const [productFilter, setProductFilter] = useState('')
+  const [busy, setBusy] = useState(false)
 
   const fetchStats = useCallback(async (d: number) => {
     setLoading(true)
@@ -103,30 +123,95 @@ export default function StatsPage() {
     fetchStats(days)
   }, [days, fetchStats])
 
+  const openAddSale = async () => {
+    setAddOpen(true)
+    if (products.length === 0) {
+      setProductsLoading(true)
+      try {
+        const res = await fetch('/api/admin/products', { cache: 'no-store' })
+        const list = await res.json()
+        if (Array.isArray(list)) setProducts(list)
+      } catch (e) {
+        console.error(e)
+      } finally {
+        setProductsLoading(false)
+      }
+    }
+  }
+
+  const submitSale = async () => {
+    if (!selectedId) { alert('Sélectionne un produit'); return }
+    setBusy(true)
+    try {
+      const soldAtIso = soldDate ? new Date(soldDate + 'T12:00:00').toISOString() : undefined
+      const res = await fetch('/api/admin/products/sell', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: selectedId,
+          sold_price: soldPrice,
+          sold_channel: soldChannel,
+          sold_at: soldAtIso,
+        }),
+      })
+      if (!res.ok) throw new Error('Erreur')
+      setAddOpen(false)
+      setSelectedId('')
+      setSoldPrice('')
+      setProductFilter('')
+      fetchStats(days)
+    } catch (e) {
+      alert('Impossible d\'enregistrer la vente')
+      console.error(e)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const filteredProducts = useMemo(() => {
+    const q = productFilter.trim().toLowerCase()
+    if (!q) return products
+    return products.filter(p => p.title.toLowerCase().includes(q) || p.category.toLowerCase().includes(q))
+  }, [products, productFilter])
+
+  const selectedProduct = products.find(p => String(p.id) === String(selectedId))
+
+  useEffect(() => {
+    if (selectedProduct && !soldPrice) {
+      setSoldPrice(String(selectedProduct.price ?? ''))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId])
+
   const maxTimeline = useMemo(() => {
     if (!data) return 1
     return Math.max(1, ...data.timeline.map(d => d.views + d.clicks))
   }, [data])
 
   return (
-    <div className="admin-page">
-      <div className="page-header">
+    <div className="admin-page stats-page">
+      <div className="page-header stats-header">
         <div>
-          <h1>📊 Tableau de bord — Statistiques & Ventes</h1>
-          <p>Suivi des visites, clics et ventes sur la boutique</p>
+          <h1>📊 Statistiques & Ventes</h1>
+          <p>Suivi des visites, clics et ventes</p>
         </div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {RANGES.map(r => (
-            <button
-              key={r.v}
-              onClick={() => setDays(r.v)}
-              className={`btn ${days === r.v ? 'btn-primary' : 'btn-secondary'}`}
-            >
-              {r.label}
-            </button>
-          ))}
-          <button className="btn btn-secondary" onClick={() => fetchStats(days)} disabled={loading}>
-            {loading ? '⏳' : '🔄'} Actualiser
+        <div className="stats-header-actions">
+          <div className="stats-range">
+            {RANGES.map(r => (
+              <button
+                key={r.v}
+                onClick={() => setDays(r.v)}
+                className={`btn-range ${days === r.v ? 'btn-range-active' : ''}`}
+              >
+                {r.label}
+              </button>
+            ))}
+          </div>
+          <button className="btn btn-secondary btn-compact" onClick={() => fetchStats(days)} disabled={loading}>
+            {loading ? '⏳' : '🔄'}
+          </button>
+          <button className="btn btn-primary btn-compact" onClick={openAddSale}>
+            + Vente
           </button>
         </div>
       </div>
@@ -140,20 +225,25 @@ export default function StatsPage() {
       ) : (
         <>
           {/* ─── Overview ───────────────────────────────────── */}
-          <section style={{ marginTop: 24 }}>
-            <h2 style={{ marginBottom: 12 }}>Vue d&apos;ensemble ({data.range_days}j)</h2>
+          <section className="stats-section">
+            <h2>Vue d&apos;ensemble ({data.range_days}j)</h2>
             <div className="stats-grid">
               <StatCard icon="👀" label="Pages vues" value={data.overview.page_views} sub="Landing + univers" />
-              <StatCard icon="🛍️" label="Fiches produit" value={data.overview.product_views} sub="Clics depuis catalogue" />
-              <StatCard icon="🚀" label="Clics Vinted" value={data.overview.vinted_clicks} sub="Redirections d'achat" />
+              <StatCard icon="🛍️" label="Fiches produit" value={data.overview.product_views} sub="Clics catalogue" />
+              <StatCard icon="🚀" label="Clics Vinted" value={data.overview.vinted_clicks} sub="Redirections" />
               <StatCard icon="🔧" label="Clics services" value={data.overview.service_clicks} sub="Devis initiés" />
-              <StatCard icon="👥" label="Visiteurs uniques" value={data.overview.unique_sessions} sub="Par session" />
+              <StatCard icon="👥" label="Visiteurs" value={data.overview.unique_sessions} sub="Sessions uniques" />
             </div>
           </section>
 
           {/* ─── Ventes ─────────────────────────────────────── */}
-          <section style={{ marginTop: 32 }}>
-            <h2 style={{ marginBottom: 12 }}>💰 Suivi des ventes</h2>
+          <section className="stats-section">
+            <div className="stats-section-head">
+              <h2>💰 Suivi des ventes</h2>
+              <button className="btn btn-primary btn-compact" onClick={openAddSale}>
+                + Ajouter une vente
+              </button>
+            </div>
             <div className="stats-grid">
               <StatCard icon="🏆" label="Ventes totales" value={data.sales.count} sub={fmtEur(data.sales.revenue)} />
               <StatCard icon="⌚" label="Horlogerie" value={data.sales.byUniverse.horlogerie.count} sub={fmtEur(data.sales.byUniverse.horlogerie.revenue)} />
@@ -161,9 +251,11 @@ export default function StatsPage() {
             </div>
 
             <div style={{ marginTop: 16 }}>
-              <h3 style={{ marginBottom: 8 }}>Ventes récentes</h3>
+              <h3 className="stats-subtitle">Ventes récentes</h3>
               {data.sales.recent.length === 0 ? (
-                <div className="info-box">Aucune vente enregistrée. Marquez un produit comme vendu depuis <Link href="/admin/products">Produits</Link>.</div>
+                <div className="info-box">
+                  Aucune vente enregistrée. Utilise <strong>+ Ajouter une vente</strong> ci-dessus, ou marque un produit comme vendu depuis <Link href="/admin/products">Produits</Link>.
+                </div>
               ) : (
                 <div className="table-container">
                   <table className="admin-table">
@@ -198,10 +290,10 @@ export default function StatsPage() {
           </section>
 
           {/* ─── Timeline ───────────────────────────────────── */}
-          <section style={{ marginTop: 32 }}>
-            <h2 style={{ marginBottom: 12 }}>📈 Activité sur {data.range_days} jours</h2>
-            <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, padding: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 160, overflowX: 'auto' }}>
+          <section className="stats-section">
+            <h2>📈 Activité sur {data.range_days} jours</h2>
+            <div className="timeline-card">
+              <div className="timeline-bars">
                 {data.timeline.map(d => {
                   const totalH = ((d.views + d.clicks) / maxTimeline) * 100
                   const viewsH = (d.views / Math.max(1, d.views + d.clicks)) * totalH
@@ -210,7 +302,7 @@ export default function StatsPage() {
                     <div
                       key={d.date}
                       title={`${d.date} — ${d.views} vues, ${d.clicks} clics`}
-                      style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', width: 18, minWidth: 18, height: '100%' }}
+                      className="timeline-bar"
                     >
                       <div style={{ height: `${clicksH}%`, background: '#10b981', borderRadius: '2px 2px 0 0' }} />
                       <div style={{ height: `${viewsH}%`, background: '#60a5fa' }} />
@@ -218,16 +310,16 @@ export default function StatsPage() {
                   )
                 })}
               </div>
-              <div style={{ display: 'flex', gap: 16, marginTop: 12, fontSize: 13, color: '#6b7280' }}>
-                <span><span style={{ display: 'inline-block', width: 12, height: 12, background: '#60a5fa', borderRadius: 2, marginRight: 6 }} />Vues</span>
-                <span><span style={{ display: 'inline-block', width: 12, height: 12, background: '#10b981', borderRadius: 2, marginRight: 6 }} />Clics (Vinted + services)</span>
+              <div className="timeline-legend">
+                <span><span className="timeline-dot" style={{ background: '#60a5fa' }} />Vues</span>
+                <span><span className="timeline-dot" style={{ background: '#10b981' }} />Clics</span>
               </div>
             </div>
           </section>
 
           {/* ─── Top Produits ────────────────────────────────── */}
-          <section style={{ marginTop: 32 }}>
-            <h2 style={{ marginBottom: 12 }}>🏆 Top produits consultés</h2>
+          <section className="stats-section">
+            <h2>🏆 Top produits consultés</h2>
             {data.topProducts.length === 0 ? (
               <div className="info-box">Aucun produit consulté sur cette période.</div>
             ) : (
@@ -237,9 +329,9 @@ export default function StatsPage() {
                     <tr>
                       <th>Produit</th>
                       <th>Univers</th>
-                      <th>Vues fiche</th>
-                      <th>Clics Vinted</th>
-                      <th>Clics service</th>
+                      <th>Vues</th>
+                      <th>Vinted</th>
+                      <th>Service</th>
                       <th>Statut</th>
                     </tr>
                   </thead>
@@ -249,7 +341,7 @@ export default function StatsPage() {
                         <td className="product-title">{p.title}</td>
                         <td>
                           <span className={`badge badge-${p.universe}`}>
-                            {p.universe === 'horlogerie' ? '⌚' : '💻'} {p.universe}
+                            {p.universe === 'horlogerie' ? '⌚' : '💻'}
                           </span>
                         </td>
                         <td>{p.views}</td>
@@ -259,7 +351,7 @@ export default function StatsPage() {
                           {p.sold_at ? (
                             <span className="badge" style={{ background: '#dcfce7', color: '#166534' }}>Vendu</span>
                           ) : p.stock > 0 ? (
-                            <span className="badge" style={{ background: '#dbeafe', color: '#1e40af' }}>En stock ({p.stock})</span>
+                            <span className="badge" style={{ background: '#dbeafe', color: '#1e40af' }}>Stock ({p.stock})</span>
                           ) : (
                             <span className="badge" style={{ background: '#fee2e2', color: '#991b1b' }}>Rupture</span>
                           )}
@@ -273,17 +365,15 @@ export default function StatsPage() {
           </section>
 
           {/* ─── Split par univers ───────────────────────────── */}
-          <section style={{ marginTop: 32 }}>
-            <h2 style={{ marginBottom: 12 }}>Répartition par univers</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+          <section className="stats-section">
+            <h2>Répartition par univers</h2>
+            <div className="universe-grid">
               {(['horlogerie', 'informatique'] as const).map(u => {
                 const b = data.byUniverse[u]
                 return (
-                  <div key={u} style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, padding: 16 }}>
-                    <h3 style={{ margin: 0, marginBottom: 10 }}>
-                      {u === 'horlogerie' ? '⌚ Horlogerie' : '💻 Informatique'}
-                    </h3>
-                    <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 6 }}>
+                  <div key={u} className="universe-card">
+                    <h3>{u === 'horlogerie' ? '⌚ Horlogerie' : '💻 Informatique'}</h3>
+                    <ul>
                       <li>👀 Pages vues : <strong>{b.page_views}</strong></li>
                       <li>🛍️ Fiches produit : <strong>{b.product_views}</strong></li>
                       <li>🚀 Clics Vinted : <strong>{b.vinted_clicks}</strong></li>
@@ -296,10 +386,10 @@ export default function StatsPage() {
           </section>
 
           {/* ─── Events récents ─────────────────────────────── */}
-          <section style={{ marginTop: 32, marginBottom: 32 }}>
-            <h2 style={{ marginBottom: 12 }}>🕓 Derniers événements</h2>
+          <section className="stats-section">
+            <h2>🕓 Derniers événements</h2>
             {data.recentEvents.length === 0 ? (
-              <div className="info-box">Aucun événement pour le moment.</div>
+              <div className="info-box">Aucun événement.</div>
             ) : (
               <div className="table-container">
                 <table className="admin-table">
@@ -309,7 +399,6 @@ export default function StatsPage() {
                       <th>Type</th>
                       <th>Univers</th>
                       <th>Produit</th>
-                      <th>Page</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -325,7 +414,6 @@ export default function StatsPage() {
                           </td>
                           <td>{e.universe ?? '—'}</td>
                           <td>{e.product ?? '—'}</td>
-                          <td style={{ fontFamily: 'monospace', fontSize: 12 }}>{e.path ?? '—'}</td>
                         </tr>
                       )
                     })}
@@ -335,6 +423,104 @@ export default function StatsPage() {
             )}
           </section>
         </>
+      )}
+
+      {/* ─── Modal Ajouter une vente ───────────────────────── */}
+      {addOpen && (
+        <div
+          onClick={() => !busy && setAddOpen(false)}
+          className="stats-modal-overlay"
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            className="stats-modal"
+          >
+            <h3>💸 Ajouter une vente</h3>
+            <p className="stats-modal-hint">
+              Sélectionne un produit en base, choisis la date (même ancienne) et le prix réel de vente.
+            </p>
+
+            <label className="stats-modal-label">
+              Rechercher un produit
+              <input
+                type="text"
+                value={productFilter}
+                onChange={e => setProductFilter(e.target.value)}
+                placeholder="Nom ou catégorie..."
+                className="stats-modal-input"
+              />
+            </label>
+
+            <label className="stats-modal-label">
+              Produit
+              {productsLoading ? (
+                <div style={{ padding: 10, color: '#6b7280' }}>Chargement des produits...</div>
+              ) : (
+                <select
+                  value={selectedId}
+                  onChange={e => setSelectedId(e.target.value)}
+                  className="stats-modal-input"
+                  size={Math.min(6, Math.max(3, filteredProducts.length))}
+                >
+                  <option value="">— Choisir un produit —</option>
+                  {filteredProducts.map(p => (
+                    <option key={p.id} value={String(p.id)}>
+                      {p.universe === 'horlogerie' ? '⌚' : '💻'} {p.title} — {fmtEur(Number(p.price))}
+                      {p.sold_at ? ' (déjà vendu)' : ''}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </label>
+
+            <div className="stats-modal-row">
+              <label className="stats-modal-label">
+                Date de vente
+                <input
+                  type="date"
+                  value={soldDate}
+                  onChange={e => setSoldDate(e.target.value)}
+                  className="stats-modal-input"
+                  max={new Date().toISOString().slice(0, 10)}
+                />
+              </label>
+
+              <label className="stats-modal-label">
+                Prix vendu (€)
+                <input
+                  type="number"
+                  step="0.01"
+                  value={soldPrice}
+                  onChange={e => setSoldPrice(e.target.value)}
+                  placeholder={selectedProduct ? String(selectedProduct.price) : 'Prix'}
+                  className="stats-modal-input"
+                />
+              </label>
+            </div>
+
+            <label className="stats-modal-label">
+              Canal
+              <select
+                value={soldChannel}
+                onChange={e => setSoldChannel(e.target.value as 'vinted' | 'direct' | 'autre')}
+                className="stats-modal-input"
+              >
+                <option value="vinted">Vinted</option>
+                <option value="direct">Vente directe</option>
+                <option value="autre">Autre</option>
+              </select>
+            </label>
+
+            <div className="stats-modal-actions">
+              <button className="btn btn-secondary" onClick={() => setAddOpen(false)} disabled={busy}>
+                Annuler
+              </button>
+              <button className="btn btn-primary" onClick={submitSale} disabled={busy || !selectedId}>
+                {busy ? 'Enregistrement...' : 'Enregistrer la vente'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

@@ -6,10 +6,11 @@ const ALLOWED_CHANNELS = new Set(['vinted', 'direct', 'autre'])
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => ({}))
-    const { id, sold_price, sold_channel } = body as {
-      id?: string
+    const { id, sold_price, sold_channel, sold_at } = body as {
+      id?: string | number
       sold_price?: number | string
       sold_channel?: string
+      sold_at?: string
     }
 
     if (!id) {
@@ -21,10 +22,16 @@ export async function POST(request: NextRequest) {
       ? Number(sold_price)
       : null
 
+    let soldAtIso = new Date().toISOString()
+    if (typeof sold_at === 'string' && sold_at.trim()) {
+      const d = new Date(sold_at)
+      if (!Number.isNaN(d.getTime())) soldAtIso = d.toISOString()
+    }
+
     const { data, error } = await getSupabaseAdmin()
       .from('products')
       .update({
-        sold_at: new Date().toISOString(),
+        sold_at: soldAtIso,
         sold_price: Number.isFinite(price) ? price : null,
         sold_channel: channel,
         stock: 0,

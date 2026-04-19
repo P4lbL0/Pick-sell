@@ -961,3 +961,236 @@
     font-size: 15px;
   }
 }
+
+/* ========== PAGE STATISTIQUES ========== */
+.stats-page .stats-header {
+  align-items: flex-start;
+  gap: 16px;
+}
+.stats-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.stats-range {
+  display: inline-flex;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 10px;
+  gap: 2px;
+}
+.btn-range {
+  padding: 6px 12px;
+  border: none;
+  background: transparent;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.btn-range:hover { color: #0f172a; }
+.btn-range-active {
+  background: #fff;
+  color: #0f172a;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.btn-compact {
+  padding: 8px 14px !important;
+  font-size: 13px !important;
+}
+
+.stats-section {
+  margin-top: 28px;
+}
+.stats-section h2 {
+  margin: 0 0 14px 0;
+  font-size: 18px;
+  color: #1e293b;
+}
+.stats-subtitle {
+  margin: 0 0 10px 0;
+  font-size: 15px;
+  color: #334155;
+}
+.stats-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.stats-section-head h2 { margin: 0; }
+
+.timeline-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+}
+.timeline-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 160px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+.timeline-bar {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  width: 18px;
+  min-width: 18px;
+  height: 100%;
+}
+.timeline-legend {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: #6b7280;
+  flex-wrap: wrap;
+}
+.timeline-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  margin-right: 6px;
+  vertical-align: -1px;
+}
+
+.universe-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+.universe-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+}
+.universe-card h3 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+}
+.universe-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+}
+
+/* Modal "Ajouter une vente" */
+.stats-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  overflow-y: auto;
+}
+.stats-modal {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  width: min(520px, 100%);
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+}
+.stats-modal h3 { margin: 0 0 6px 0; font-size: 18px; }
+.stats-modal-hint { margin: 0 0 14px 0; color: #6b7280; font-size: 13px; }
+.stats-modal-label {
+  display: block;
+  margin-top: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #374151;
+}
+.stats-modal-input {
+  width: 100%;
+  padding: 10px 12px;
+  margin-top: 6px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  background: #fff;
+}
+.stats-modal-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+}
+.stats-modal-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.stats-modal-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+/* Mobile : page stats */
+@media (max-width: 768px) {
+  .stats-page .page-header {
+    padding-bottom: 16px;
+  }
+  .stats-page .page-header h1 {
+    font-size: 20px;
+  }
+  .stats-header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .stats-range {
+    flex: 1;
+    justify-content: space-between;
+  }
+  .btn-range {
+    padding: 7px 8px;
+    font-size: 12px;
+  }
+  .stats-section h2 {
+    font-size: 16px;
+  }
+  .timeline-bar {
+    width: 10px;
+    min-width: 10px;
+  }
+  .stats-modal-row {
+    grid-template-columns: 1fr;
+  }
+  .stats-modal-actions .btn {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn-range {
+    padding: 7px 6px;
+    font-size: 11px;
+  }
+  .btn-compact {
+    padding: 7px 10px !important;
+    font-size: 12px !important;
+  }
+}
