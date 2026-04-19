@@ -154,14 +154,18 @@ export default function StatsPage() {
           sold_at: soldAtIso,
         }),
       })
-      if (!res.ok) throw new Error('Erreur')
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}))
+        throw new Error(errBody?.error || `HTTP ${res.status}`)
+      }
       setAddOpen(false)
       setSelectedId('')
       setSoldPrice('')
       setProductFilter('')
       fetchStats(days)
     } catch (e) {
-      alert('Impossible d\'enregistrer la vente')
+      const msg = e instanceof Error ? e.message : 'Erreur inconnue'
+      alert('Impossible d\'enregistrer la vente\n\n' + msg)
       console.error(e)
     } finally {
       setBusy(false)

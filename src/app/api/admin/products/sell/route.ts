@@ -45,8 +45,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true, product: data })
   } catch (error) {
     const msg = error instanceof Error ? error.message : 'Erreur serveur'
-    console.error('[products/sell] POST error:', msg)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+    console.error('[products/sell] POST error:', error)
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 }
 
