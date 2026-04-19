@@ -254,6 +254,24 @@
   color: #2d3748;
 }
 
+.stat-card-highlight .stat-number {
+  font-size: 40px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.02em;
+}
+.stat-card-highlight .stat-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #718096;
+}
+
+@media (max-width: 768px) {
+  .stat-card-highlight .stat-number { font-size: 28px; }
+}
+
 .stat-label {
   margin: 0;
   font-size: 12px;
@@ -1032,13 +1050,49 @@
   border-radius: 12px;
   padding: 16px;
 }
+.timeline-chart {
+  display: flex;
+  gap: 8px;
+  height: 180px;
+}
+.timeline-yaxis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #9ca3af;
+  padding: 2px 0;
+  min-width: 24px;
+  text-align: right;
+}
+.timeline-plot {
+  position: relative;
+  flex: 1;
+  border-left: 1px solid #e5e7eb;
+  border-bottom: 1px solid #d1d5db;
+  overflow: hidden;
+}
+.timeline-grid {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  pointer-events: none;
+}
+.timeline-grid-line {
+  border-top: 1px dashed #f3f4f6;
+  height: 1px;
+}
+.timeline-grid-line:last-child { border-top: none; }
 .timeline-bars {
+  position: relative;
   display: flex;
   align-items: flex-end;
   gap: 3px;
-  height: 160px;
+  height: 100%;
+  padding: 0 4px;
   overflow-x: auto;
-  padding-bottom: 4px;
   -webkit-overflow-scrolling: touch;
 }
 .timeline-bar {
@@ -1048,11 +1102,21 @@
   width: 18px;
   min-width: 18px;
   height: 100%;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.timeline-bar:hover { opacity: 0.75; }
+.timeline-xaxis {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 4px 0 32px;
+  font-size: 11px;
+  color: #6b7280;
 }
 .timeline-legend {
   display: flex;
   gap: 16px;
-  margin-top: 12px;
+  margin-top: 18px;
   font-size: 13px;
   color: #6b7280;
   flex-wrap: wrap;

@@ -249,9 +249,9 @@ export default function StatsPage() {
               </button>
             </div>
             <div className="stats-grid">
-              <StatCard icon="🏆" label="Ventes totales" value={data.sales.count} sub={fmtEur(data.sales.revenue)} />
-              <StatCard icon="⌚" label="Horlogerie" value={data.sales.byUniverse.horlogerie.count} sub={fmtEur(data.sales.byUniverse.horlogerie.revenue)} />
-              <StatCard icon="💻" label="Informatique" value={data.sales.byUniverse.informatique.count} sub={fmtEur(data.sales.byUniverse.informatique.revenue)} />
+              <StatCard icon="🏆" label="Ventes totales" value={fmtEur(data.sales.revenue)} sub={`${data.sales.count} vente${data.sales.count > 1 ? 's' : ''}`} highlight />
+              <StatCard icon="⌚" label="Horlogerie" value={fmtEur(data.sales.byUniverse.horlogerie.revenue)} sub={`${data.sales.byUniverse.horlogerie.count} vente${data.sales.byUniverse.horlogerie.count > 1 ? 's' : ''}`} highlight />
+              <StatCard icon="💻" label="Informatique" value={fmtEur(data.sales.byUniverse.informatique.revenue)} sub={`${data.sales.byUniverse.informatique.count} vente${data.sales.byUniverse.informatique.count > 1 ? 's' : ''}`} highlight />
             </div>
 
             <div style={{ marginTop: 16 }}>
@@ -297,22 +297,54 @@ export default function StatsPage() {
           <section className="stats-section">
             <h2>📈 Activité sur {data.range_days} jours</h2>
             <div className="timeline-card">
-              <div className="timeline-bars">
-                {data.timeline.map(d => {
-                  const totalH = ((d.views + d.clicks) / maxTimeline) * 100
-                  const viewsH = (d.views / Math.max(1, d.views + d.clicks)) * totalH
-                  const clicksH = totalH - viewsH
-                  return (
-                    <div
-                      key={d.date}
-                      title={`${d.date} — ${d.views} vues, ${d.clicks} clics`}
-                      className="timeline-bar"
-                    >
-                      <div style={{ height: `${clicksH}%`, background: '#10b981', borderRadius: '2px 2px 0 0' }} />
-                      <div style={{ height: `${viewsH}%`, background: '#60a5fa' }} />
-                    </div>
-                  )
-                })}
+              <div className="timeline-chart">
+                <div className="timeline-yaxis">
+                  <span>{maxTimeline}</span>
+                  <span>{Math.round(maxTimeline / 2)}</span>
+                  <span>0</span>
+                </div>
+                <div className="timeline-plot">
+                  <div className="timeline-grid">
+                    <div className="timeline-grid-line" />
+                    <div className="timeline-grid-line" />
+                    <div className="timeline-grid-line" />
+                  </div>
+                  <div className="timeline-bars">
+                    {data.timeline.map(d => {
+                      const total = d.views + d.clicks
+                      const totalH = (total / maxTimeline) * 100
+                      const viewsH = total > 0 ? (d.views / total) * totalH : 0
+                      const clicksH = total > 0 ? totalH - viewsH : 0
+                      return (
+                        <div
+                          key={d.date}
+                          title={`${new Date(d.date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })} — ${d.views} vues, ${d.clicks} clics`}
+                          className="timeline-bar"
+                        >
+                          {total > 0 && (
+                            <>
+                              <div style={{ height: `${clicksH}%`, background: '#10b981', borderRadius: '2px 2px 0 0' }} />
+                              <div style={{ height: `${viewsH}%`, background: '#60a5fa' }} />
+                            </>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+              <div className="timeline-xaxis">
+                {(() => {
+                  const n = data.timeline.length
+                  if (n === 0) return null
+                  const picks = [0, Math.floor(n / 4), Math.floor(n / 2), Math.floor((3 * n) / 4), n - 1]
+                  const seen = new Set<number>()
+                  return picks.filter(i => !seen.has(i) && seen.add(i)).map(i => (
+                    <span key={i}>
+                      {new Date(data.timeline[i].date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}
+                    </span>
+                  ))
+                })()}
               </div>
               <div className="timeline-legend">
                 <span><span className="timeline-dot" style={{ background: '#60a5fa' }} />Vues</span>
@@ -530,9 +562,9 @@ export default function StatsPage() {
   )
 }
 
-function StatCard({ icon, label, value, sub }: { icon: string; label: string; value: number | string; sub?: string }) {
+function StatCard({ icon, label, value, sub, highlight }: { icon: string; label: string; value: number | string; sub?: string; highlight?: boolean }) {
   return (
-    <div className="stat-card">
+    <div className={`stat-card${highlight ? ' stat-card-highlight' : ''}`}>
       <div className="stat-icon">{icon}</div>
       <div className="stat-content">
         <h3>{label}</h3>
