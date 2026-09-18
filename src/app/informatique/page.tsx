@@ -5,6 +5,7 @@ import { ScrollReveal } from '@/components/common/ScrollReveal'
 import { TrackPageView } from '@/components/common/TrackPageView'
 import { ServiceLink } from '@/components/common/ServiceLink'
 import { supabase } from '@/lib/supabase'
+import { Icon } from '@/components/common/Icon'
 
 export const revalidate = 60
 
@@ -49,15 +50,16 @@ export default async function InformatiqueHome() {
     getHeroSlides(),
     getConceptBlock(),
   ])
+  const slides = heroSlides.filter(s => s.image_url?.trim() || s.video_url?.trim())
 
   return (
     <main className="min-h-screen bg-white">
       <TrackPageView universe="informatique" />
 
       {/* ── Hero Slider ou Hero Fallback ── */}
-      {heroSlides.length > 0 ? (
+      {slides.length > 0 ? (
         <section className="mb-12 md:mb-16">
-          <HeroSlider slides={heroSlides} autoplay={true} />
+          <HeroSlider slides={slides} autoplay={true} />
         </section>
       ) : (
         <section className="relative py-32 md:py-44 overflow-hidden">
@@ -120,12 +122,12 @@ export default async function InformatiqueHome() {
             <div className="anim-fade-up flex flex-col sm:flex-row gap-3 justify-center md:justify-end" style={{ animationDelay: '0.55s' }}>
               <ServiceLink href="/informatique/services/repair" universe="informatique" serviceType="repair" className="inline-block">
                 <button className="px-7 py-3.5 bg-blue-500 text-white font-bold rounded-xl hover:bg-blue-400 transition-all duration-300 shadow-lg shadow-blue-900/40 hover:shadow-blue-500/30 hover:-translate-y-0.5 flex items-center gap-2 justify-center text-base">
-                  🔧 Réparer mon PC
+                  <Icon name="wrench" /> Réparer mon PC
                 </button>
               </ServiceLink>
               <ServiceLink href="/informatique/services/buyback" universe="informatique" serviceType="buyback" className="inline-block">
                 <button className="px-7 py-3.5 bg-white/5 border border-blue-500/20 text-blue-100/60 font-bold rounded-xl hover:bg-white/8 hover:border-blue-400/40 hover:text-blue-100 transition-all duration-300 hover:-translate-y-0.5 flex items-center gap-2 justify-center text-base">
-                  ♻️ Faire reprendre mon PC
+                  <Icon name="recycle" /> Faire reprendre mon PC
                 </button>
               </ServiceLink>
             </div>
@@ -161,7 +163,7 @@ export default async function InformatiqueHome() {
           {products.length === 0 ? (
             <ScrollReveal>
               <div className="py-20 text-center rounded-2xl border border-blue-200 bg-blue-50">
-                <div className="text-5xl mb-4 opacity-40">💻</div>
+                <div className="mb-4 flex justify-center text-blue-700 opacity-40"><Icon name="laptop" className="w-12 h-12" /></div>
                 <p className="text-gray-600 text-lg">Aucun produit disponible pour l&apos;instant</p>
                 <p className="text-gray-400 text-sm mt-2">Revenez bientôt !</p>
               </div>
@@ -188,7 +190,7 @@ export default async function InformatiqueHome() {
                 <div className="absolute inset-0 rounded-2xl ring-1 ring-blue-500/15 group-hover:ring-blue-400/30 transition-all duration-500" />
                 <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/8 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:bg-blue-500/15 transition-all duration-700" />
                 <div className="relative z-10">
-                  <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-2xl mb-6 ring-1 ring-blue-400/15">🖥️</div>
+                  <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 mb-6 ring-1 ring-blue-400/15"><Icon name="monitor" className="w-6 h-6" /></div>
                   <h3 className="text-2xl font-bold text-white mb-3">Réparation Informatique</h3>
                   <p className="text-blue-100/35 mb-6 leading-relaxed text-sm">
                     Diagnostic complet, remplacement écran/clavier/batterie, nettoyage thermique, installation OS, suppression virus, récupération de données.
@@ -212,7 +214,7 @@ export default async function InformatiqueHome() {
                 <div className="absolute inset-0 rounded-2xl ring-1 ring-blue-500/15 group-hover:ring-blue-400/30 transition-all duration-500" />
                 <div className="absolute bottom-0 left-0 w-48 h-48 bg-cyan-600/6 rounded-full translate-y-1/2 -translate-x-1/2 blur-2xl group-hover:bg-cyan-600/12 transition-all duration-700" />
                 <div className="relative z-10">
-                  <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-2xl mb-6 ring-1 ring-blue-400/15">♻️</div>
+                  <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 mb-6 ring-1 ring-blue-400/15"><Icon name="recycle" className="w-6 h-6" /></div>
                   <h3 className="text-2xl font-bold text-white mb-3">Reprise d&apos;Ordinateur</h3>
                   <p className="text-blue-100/35 mb-6 leading-relaxed text-sm">
                     Nous rachetons vos anciens ordinateurs, PC portables, composants et périphériques. Évaluation gratuite, processus simple et transparent.

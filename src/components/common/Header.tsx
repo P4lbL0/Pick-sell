@@ -39,7 +39,7 @@ export function Header({ universe, children }: HeaderProps) {
         {/* Back to global home */}
         <Link
           href="/"
-          className="text-xs sm:text-sm text-gray-600 hover:text-gray-900 transition"
+          className="ml-auto md:ml-0 text-sm text-gray-600 hover:text-gray-900 transition py-2"
         >
           Pick Sell
         </Link>

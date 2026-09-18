@@ -5,6 +5,7 @@ import { ScrollReveal } from '@/components/common/ScrollReveal'
 import { TrackPageView } from '@/components/common/TrackPageView'
 import { ServiceLink } from '@/components/common/ServiceLink'
 import { supabase } from '@/lib/supabase'
+import { Icon } from '@/components/common/Icon'
 
 export const revalidate = 60
 
@@ -49,15 +50,16 @@ export default async function HorlogerieHome() {
     getHeroSlides(),
     getConceptBlock(),
   ])
+  const slides = heroSlides.filter(s => s.image_url?.trim() || s.video_url?.trim())
 
   return (
     <main className="min-h-screen bg-white">
       <TrackPageView universe="horlogerie" />
 
       {/* ── Hero Slider ou Hero Fallback ── */}
-      {heroSlides.length > 0 ? (
+      {slides.length > 0 ? (
         <section className="mb-12 md:mb-16">
-          <HeroSlider slides={heroSlides} autoplay={true} />
+          <HeroSlider slides={slides} autoplay={true} />
         </section>
       ) : (
         <section className="relative py-32 md:py-44 overflow-hidden">
@@ -83,7 +85,7 @@ export default async function HorlogerieHome() {
           <div className="absolute right-[5%] top-1/2 -translate-y-1/2 w-64 h-64 md:w-80 md:h-80 rounded-full border border-amber-500/10 hidden md:flex items-center justify-center">
             <div className="w-52 h-52 md:w-64 md:h-64 rounded-full border border-amber-500/8 flex items-center justify-center">
               <div className="w-40 h-40 md:w-48 md:h-48 rounded-full border border-amber-500/6 flex items-center justify-center">
-                <span className="text-6xl md:text-7xl opacity-10 anim-float">⌚</span>
+                <span className="text-amber-400 opacity-10 anim-float"><Icon name="watch" className="w-20 h-20" /></span>
               </div>
             </div>
           </div>
@@ -109,12 +111,12 @@ export default async function HorlogerieHome() {
             <div className="anim-fade-up flex flex-col sm:flex-row gap-3 justify-center md:justify-start" style={{ animationDelay: '0.55s' }}>
               <ServiceLink href="/horlogerie/services/repair" universe="horlogerie" serviceType="repair" className="inline-block">
                 <button className="px-7 py-3.5 bg-amber-500 text-amber-950 font-bold rounded-xl hover:bg-amber-400 transition-all duration-300 shadow-lg shadow-amber-900/40 hover:shadow-amber-500/30 hover:-translate-y-0.5 flex items-center gap-2 justify-center text-base">
-                  🔧 Réparer ma montre
+                  <Icon name="wrench" /> Réparer ma montre
                 </button>
               </ServiceLink>
               <ServiceLink href="/horlogerie/services/custom" universe="horlogerie" serviceType="custom" className="inline-block">
                 <button className="px-7 py-3.5 bg-white/5 border border-amber-500/20 text-amber-100/70 font-bold rounded-xl hover:bg-white/8 hover:border-amber-400/40 hover:text-amber-100 transition-all duration-300 hover:-translate-y-0.5 flex items-center gap-2 justify-center text-base">
-                  🎨 Créer sur-mesure
+                  <Icon name="palette" /> Créer sur-mesure
                 </button>
               </ServiceLink>
             </div>
@@ -150,7 +152,7 @@ export default async function HorlogerieHome() {
           {products.length === 0 ? (
             <ScrollReveal>
               <div className="py-20 text-center rounded-2xl border border-amber-200 bg-amber-50">
-                <div className="text-5xl mb-4 opacity-40">⌚</div>
+                <div className="mb-4 flex justify-center text-amber-700 opacity-40"><Icon name="watch" className="w-12 h-12" /></div>
                 <p className="text-gray-600 text-lg">Aucun produit disponible pour l&apos;instant</p>
                 <p className="text-gray-400 text-sm mt-2">Revenez bientôt !</p>
               </div>
@@ -177,7 +179,7 @@ export default async function HorlogerieHome() {
                 <div className="absolute inset-0 rounded-2xl ring-1 ring-amber-500/15 group-hover:ring-amber-400/30 transition-all duration-500" />
                 <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/8 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:bg-amber-500/15 transition-all duration-700" />
                 <div className="relative z-10">
-                  <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-2xl mb-6 ring-1 ring-amber-400/15">🔧</div>
+                  <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 mb-6 ring-1 ring-amber-400/15"><Icon name="wrench" className="w-6 h-6" /></div>
                   <h3 className="text-2xl font-bold text-white mb-3">Réparation, Restauration & Révision</h3>
                   <p className="text-amber-100/40 mb-6 leading-relaxed text-sm">
                     Nettoyage, lubrification, remplacement de pièces, polissage du boîtier, restauration complète.
@@ -201,7 +203,7 @@ export default async function HorlogerieHome() {
                 <div className="absolute inset-0 rounded-2xl ring-1 ring-amber-500/15 group-hover:ring-amber-400/30 transition-all duration-500" />
                 <div className="absolute bottom-0 left-0 w-48 h-48 bg-amber-600/8 rounded-full translate-y-1/2 -translate-x-1/2 blur-2xl group-hover:bg-amber-600/15 transition-all duration-700" />
                 <div className="relative z-10">
-                  <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-2xl mb-6 ring-1 ring-amber-400/15">🎨</div>
+                  <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 mb-6 ring-1 ring-amber-400/15"><Icon name="palette" className="w-6 h-6" /></div>
                   <h3 className="text-2xl font-bold text-white mb-3">Montre Personnalisée / Sur-mesure</h3>
                   <p className="text-amber-100/40 mb-6 leading-relaxed text-sm">
                     Choisissez chaque détail : cadran, aiguilles, lunette, crystal saphir, bracelet... Une pièce unique.

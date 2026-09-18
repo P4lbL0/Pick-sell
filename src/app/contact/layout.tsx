@@ -9,8 +9,8 @@ export const metadata: Metadata = {
 }
 
 const contactNavigation = [
-  { label: '⌚ Horlogerie', href: '/horlogerie' },
-  { label: '💻 Informatique', href: '/informatique' },
+  { label: 'Horlogerie', href: '/horlogerie' },
+  { label: 'Informatique', href: '/informatique' },
 ]
 
 export default function ContactLayout({ children }: { children: React.ReactNode }) {

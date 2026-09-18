@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { Icon } from '@/components/common/Icon'
+import { PlatformIcon, PLATFORM_LABELS, contactDisplay, isPlatform, normalizeContact } from '@/components/common/PlatformIcon'
 
 interface ContactInfo {
   id?: string
@@ -20,25 +22,16 @@ export default function ContactPage() {
   useEffect(() => {
     fetch('/api/contacts')
       .then(r => r.ok ? r.json() : null)
-      .then(data => { if (data?.contacts) setContacts(data.contacts) })
+      .then(data => { if (data?.contacts) setContacts(data.contacts.map(normalizeContact)) })
       .catch(() => {})
   }, [])
 
-  const PLATFORM_INFO: Record<string, { label: string; icon: string; color: string }> = {
-    email:     { label: 'Email',     icon: '📧', color: 'from-blue-50 to-blue-100 border-blue-200' },
-    whatsapp:  { label: 'WhatsApp',  icon: '💬', color: 'from-green-50 to-green-100 border-green-200' },
-    instagram: { label: 'Instagram', icon: '📷', color: 'from-pink-50 to-pink-100 border-pink-200' },
-    tiktok:    { label: 'TikTok',    icon: '🎵', color: 'from-gray-50 to-gray-100 border-gray-200' },
-    vinted:    { label: 'Vinted',    icon: '🛍️', color: 'from-teal-50 to-teal-100 border-teal-200' },
-  }
-
-  const getContactDisplay = (platform: string) =>
-    PLATFORM_INFO[platform] || { label: platform, icon: '🔗', color: 'from-gray-50 to-gray-100 border-gray-200' }
-
-  function displayLabel(platform: string, url: string) {
-    if (platform === 'email') return url.replace('mailto:', '')
-    if (platform === 'whatsapp') return url.replace('https://wa.me/', '+')
-    return url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')
+  const PLATFORM_COLOR: Record<string, string> = {
+    email:     'from-blue-50 to-blue-100 border-blue-200 text-blue-700',
+    whatsapp:  'from-green-50 to-green-100 border-green-200 text-green-700',
+    instagram: 'from-pink-50 to-pink-100 border-pink-200 text-pink-700',
+    tiktok:    'from-gray-50 to-gray-100 border-gray-200 text-gray-800',
+    vinted:    'from-teal-50 to-teal-100 border-teal-200 text-teal-700',
   }
 
   const horlogerieContacts = contacts.filter(c => c.universe === 'horlogerie')
@@ -78,14 +71,16 @@ export default function ContactPage() {
     )
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {list.map(c => {
-          const info = getContactDisplay(c.platform)
+        {list.filter(c => isPlatform(c.platform)).map(c => {
+          const platform = c.platform as keyof typeof PLATFORM_LABELS
           return (
-            <a key={c.id} href={c.url} target="_blank" rel="noopener noreferrer"
-              className={`bg-gradient-to-br ${info.color} p-6 rounded-xl border hover:shadow-md transition group`}>
-              <div className="text-3xl mb-3">{info.icon}</div>
-              <h3 className="font-bold text-gray-900 mb-1">{info.label}</h3>
-              <p className="text-gray-600 text-sm truncate">{displayLabel(c.platform, c.url)}</p>
+            <a key={c.id} href={c.url} target={platform === 'email' ? undefined : '_blank'} rel="noopener noreferrer"
+              className={`bg-gradient-to-br ${PLATFORM_COLOR[platform]} p-6 rounded-xl border hover:shadow-md transition group`}>
+              <div className="w-11 h-11 mb-3 rounded-lg bg-white/70 flex items-center justify-center">
+                <PlatformIcon platform={platform} className="w-6 h-6" />
+              </div>
+              <h3 className="font-bold text-gray-900 mb-1">{PLATFORM_LABELS[platform]}</h3>
+              <p className="text-gray-600 text-sm truncate">{contactDisplay(platform, c.url)}</p>
               <span className="text-xs text-gray-500 group-hover:text-gray-700 mt-2 inline-block transition">
                 Nous contacter →
               </span>
@@ -114,18 +109,20 @@ export default function ContactPage() {
           {/* Horlogerie */}
           <div className="mb-10">
             <h2 className="text-xl font-black text-gray-900 mb-4 flex items-center gap-2">
-              <span className="text-2xl">⌚</span> Contact Horlogerie
+              <Icon name="watch" className="w-6 h-6 text-amber-700" /> Contact Horlogerie
             </h2>
             <ContactCards list={horlogerieContacts} />
           </div>
 
           {/* Informatique */}
-          <div className="mb-12">
-            <h2 className="text-xl font-black text-gray-900 mb-4 flex items-center gap-2">
-              <span className="text-2xl">💻</span> Contact Informatique
-            </h2>
-            <ContactCards list={informatiqueContacts} />
-          </div>
+          {informatiqueContacts.length > 0 && (
+            <div className="mb-12">
+              <h2 className="text-xl font-black text-gray-900 mb-4 flex items-center gap-2">
+                <Icon name="laptop" className="w-6 h-6 text-slate-700" /> Contact Informatique
+              </h2>
+              <ContactCards list={informatiqueContacts} />
+            </div>
+          )}
 
           {/* Contact Form */}
           <div className="bg-white p-8 md:p-12 rounded-2xl border border-gray-200 shadow-sm">
@@ -134,7 +131,7 @@ export default function ContactPage() {
 
             {submitted ? (
               <div className="p-6 bg-green-50 border border-green-200 rounded-xl text-center">
-                <div className="text-4xl mb-3">✅</div>
+                <div className="mb-3 flex justify-center text-green-600"><svg className="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="M8 12l3 3 5-6" /></svg></div>
                 <p className="text-green-800 font-bold text-xl mb-2">Message envoyé !</p>
                 <p className="text-green-700">Nous vous répondrons dans les 24h.</p>
                 <button
@@ -219,17 +216,17 @@ export default function ContactPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-gray-700">
             <div className="space-y-6">
               <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">⌚ L'Univers Horlogerie</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">L'Univers Horlogerie</h3>
                 <p className="leading-relaxed text-gray-600">Chez Ssæa Montres, nous proposons des montres Seiko modifiées exclusives, des pièces vintage restaurées et une gamme complète d'accessoires horlogers.</p>
               </div>
               <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">💻 L'Univers Informatique</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">L'Univers Informatique</h3>
                 <p className="leading-relaxed text-gray-600">Notre collection informatique propose des ordinateurs et accessoires reconditionnés de haute qualité, testés et garantis.</p>
               </div>
             </div>
             <div className="space-y-6">
               <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">🛠️ Nos Services</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Nos Services</h3>
                 <ul className="space-y-1 text-gray-600 text-sm">
                   <li>→ Réparation &amp; Révision de montres</li>
                   <li>→ Montres personnalisées sur-mesure</li>
@@ -238,17 +235,17 @@ export default function ContactPage() {
                 </ul>
               </div>
               <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">💡 Nos Valeurs</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Nos Valeurs</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">Qualité, Transparence, Durabilité. Chaque produit est testé, chaque description est honnête.</p>
               </div>
             </div>
           </div>
           <div className="mt-10 pt-8 border-t border-gray-100 flex flex-col sm:flex-row gap-4">
             <Link href="/horlogerie">
-              <button className="px-8 py-3 bg-amber-700 hover:bg-amber-600 text-white font-bold rounded-xl transition">⌚ Découvrir l'Horlogerie</button>
+              <button className="px-8 py-3 bg-amber-700 hover:bg-amber-600 text-white font-bold rounded-xl transition inline-flex items-center gap-2"><Icon name="watch" /> Découvrir l'Horlogerie</button>
             </Link>
             <Link href="/informatique">
-              <button className="px-8 py-3 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl transition">💻 Découvrir l'Informatique</button>
+              <button className="px-8 py-3 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl transition inline-flex items-center gap-2"><Icon name="laptop" /> Découvrir l'Informatique</button>
             </Link>
           </div>
         </div>

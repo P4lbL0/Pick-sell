@@ -32,7 +32,7 @@ export default function InformatiqueLayout({ children }: InformatiqueLayoutProps
         <Navigation links={informatiqueNavigation} universe="informatique" />
       </Header>
 
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 overflow-x-clip">{children}</main>
 
       <Footer universe="informatique" />
     </div>

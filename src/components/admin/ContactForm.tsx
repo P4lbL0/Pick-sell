@@ -23,7 +23,8 @@ function buildUrl(platform: string, raw: string): string {
     return raw.startsWith('mailto:') ? raw : `mailto:${raw.trim()}`
   }
   if (platform === 'whatsapp') {
-    const digits = raw.replace(/\s+/g, '').replace(/^\+/, '')
+    // Format international exigé par wa.me : 06 12 … → 33612…
+    const digits = raw.replace(/[^\d+]/g, '').replace(/^\+/, '').replace(/^00/, '').replace(/^0(?=\d{9}$)/, '33')
     return `https://wa.me/${digits}`
   }
   return raw.trim()

@@ -11,6 +11,8 @@
 - Sécurité points 1 à 7 ci-dessous : **tous corrigés** (connexion admin, RLS refermée, storage fermé, Next 16.3.5, images limitées à Supabase).
 - Admin cassé : **tout corrigé** (bannières, blocs de contenu, services — y compris le lien de contact qui ne s'enregistrait jamais —, coloris, grilles tarifaires). Testé de bout en bout.
 - Restent ouverts : sections « Données » et « Qualité / SEO / légal ».
+- Front responsive (même jour) : menu mobile ajouté sur les univers (il n'y avait aucune navigation sous 768 px), débordement horizontal de 12 px corrigé, pied de page branché sur la table `contacts` (liens email/WhatsApp/Instagram/TikTok étaient cassés), page Contact nettoyée (@pseudo, icônes SVG, section vide masquée), bannières sans image ni vidéo ignorées (repli sur le hero du thème), `lang="fr"`, animations désactivées si l'utilisateur réduit les animations. Vérifié sans débordement à 320 / 375 / 768 / 1280 px sur 15 pages. Captures : `docs/screens/`.
+- Données corrigées : lien WhatsApp au format international (`wa.me/33…`, l'ancien `wa.me/06…` ne fonctionnait pas), URL Instagram sans espace, plateforme en minuscules. L'admin convertit maintenant un numéro saisi en 06… automatiquement.
 
 ## 🔐 Connexion admin & écritures (depuis le 2026-09-18)
 
@@ -269,6 +271,7 @@ NEXT_PUBLIC_CONTACT_EMAIL=contact@picksel.com                      ← À mettre
 | 2026-04-19 | **Sidebar admin** : ajout lien "Statistiques & ventes" | `src/app/admin/layout.tsx` |
 | 2026-09-18 | **Audit complet** code + base + prod (sécurité, admin, données, SEO) — voir section « AUDIT DU 2026-09-18 ». Aucun code modifié. | `CONTEXTE_PROJET.md` |
 | 2026-09-18 | **Chantier sécurité** : connexion admin (Supabase Auth, rôle `admin`), proxy + `requireAdmin` sur toutes les routes admin/upload, écritures admin 100 % serveur (`admin-crud`, `admin-api`), nouvelles routes `content-blocks` et `service-quotes`, migration RLS (lecture seule publique, storage fermé), Next 16.3.5, images limitées à Supabase, correctifs admin (bannières, contenus, services, coloris, grilles), emojis admin → SVG / retirés, `html-react-parser` retiré | `src/proxy.ts`, `src/lib/*`, `src/app/api/**`, `src/app/admin/**`, `src/components/admin/*`, `supabase/migrations/20260918120000_securite_rls.sql`, `scripts/create-admin.mjs` |
+| 2026-09-18 | **Front responsive** : menu mobile (`Navigation`), rognage horizontal, pied de page sur la table `contacts` (`Footer` serveur), icônes partagées `Icon` / `PlatformIcon`, page Contact revue, bannières vides ignorées, `lang="fr"`, reduced-motion, onglets bannières admin qui passent à la ligne, emojis → SVG sur les pages touchées | `src/components/common/*`, `src/app/contact/*`, `src/app/horlogerie/*`, `src/app/informatique/*`, `src/app/globals.css`, `src/app/layout.tsx`, `src/app/admin/hero-slides/page.tsx`, `src/components/admin/ContactForm.tsx` |
 
 ---
 

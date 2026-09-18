@@ -75,7 +75,7 @@ export default function HeroSlidesPage() {
       </div>
 
       {/* Onglets par thème */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 24, borderBottom: '2px solid #e5e7eb', paddingBottom: 0 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 24, borderBottom: '2px solid #e5e7eb', paddingBottom: 0 }}>
         {TABS.map(tab => {
           const count = slides.filter(s => s.universe_type === tab.key).length
           const isActive = activeTab === tab.key
@@ -84,7 +84,7 @@ export default function HeroSlidesPage() {
               key={tab.key}
               onClick={() => { setActiveTab(tab.key); setShowForm(false); setEditingSlide(null) }}
               style={{
-                padding: '10px 20px',
+                padding: '10px 14px',
                 fontWeight: 700,
                 fontSize: '0.95rem',
                 border: 'none',

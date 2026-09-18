@@ -32,7 +32,7 @@ export default function HorlogerieLayout({ children }: HorlogerieLayoutProps) {
         <Navigation links={horlogerieNavigation} universe="horlogerie" />
       </Header>
 
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 overflow-x-clip">{children}</main>
 
       <Footer universe="horlogerie" />
     </div>
