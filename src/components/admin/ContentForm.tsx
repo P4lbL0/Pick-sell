@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { supabase } from '@/lib/supabase'
+import { adminApi } from '@/lib/admin-api'
 import { ContentBlock } from '@/lib/types'
 
 interface ContentFormProps {
@@ -59,17 +59,12 @@ export default function ContentForm({ content, onClose }: ContentFormProps) {
         bg_image_url: formData.bg_image_url || null,
         bg_video_url: formData.bg_video_url || null,
         bg_overlay_opacity: Number(formData.bg_overlay_opacity),
-        updated_at: new Date().toISOString(),
       }
 
       if (content?.id) {
-        const { error: updateError } = await supabase
-          .from('content_blocks').update(payload).eq('id', content.id)
-        if (updateError) throw updateError
+        await adminApi('content-blocks', { method: 'PUT', body: { id: content.id, ...payload } })
       } else {
-        const { error: insertError } = await supabase
-          .from('content_blocks').insert([{ ...payload, created_at: new Date().toISOString() }])
-        if (insertError) throw insertError
+        await adminApi('content-blocks', { method: 'POST', body: payload })
       }
       onClose()
     } catch (err: unknown) {
@@ -116,11 +111,11 @@ export default function ContentForm({ content, onClose }: ContentFormProps) {
         {/* ── FOND PERSONNALISÉ ── */}
         <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '2px solid #e5e7eb' }}>
           <h3 style={{ fontWeight: 700, marginBottom: '0.5rem', color: '#374151', fontSize: '1.1rem' }}>
-            🖼️ Image / Vidéo de fond (optionnel)
+            Image / Vidéo de fond (optionnel)
           </h3>
           <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: '10px 14px', marginBottom: '1rem' }}>
             <p style={{ fontSize: '0.8rem', color: '#166534', margin: 0, fontWeight: 600 }}>
-              📍 Ce fond s'affiche derrière le texte de ce bloc sur la page du site (ex : section "Notre Concept" en Horlogerie).
+              Ce fond s'affiche derrière le texte de ce bloc sur la page du site (ex : section "Notre Concept" en Horlogerie).
             </p>
           </div>
 
@@ -134,7 +129,7 @@ export default function ContentForm({ content, onClose }: ContentFormProps) {
                 fontWeight: 700, fontSize: '0.95rem', cursor: uploading ? 'not-allowed' : 'pointer',
                 minHeight: 52, width: '100%', boxSizing: 'border-box' as const,
               }}>
-                {uploading ? '⏳ Upload en cours...' : '📤 Choisir une image de fond'}
+                {uploading ? 'Upload en cours...' : 'Choisir une image de fond'}
                 <input type="file" accept="image/*" onChange={handleUploadBg}
                   style={{ display: 'none' }} disabled={uploading} />
               </label>
@@ -144,7 +139,7 @@ export default function ContentForm({ content, onClose }: ContentFormProps) {
                   <img src={formData.bg_image_url} alt="bg preview"
                     style={{ width: 80, height: 60, borderRadius: 6, objectFit: 'cover', border: '2px solid #667eea' }} />
                   <div>
-                    <p style={{ fontSize: '0.8rem', color: '#22c55e', fontWeight: 700 }}>✅ Image chargée</p>
+                    <p style={{ fontSize: '0.8rem', color: '#22c55e', fontWeight: 700 }}>Image chargée</p>
                     <button type="button" onClick={() => setFormData(p => ({ ...p, bg_image_url: '' }))}
                       style={{ fontSize: '0.75rem', color: '#e53e3e', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
                       ✕ Supprimer
@@ -167,7 +162,7 @@ export default function ContentForm({ content, onClose }: ContentFormProps) {
             <label>Vidéo de fond</label>
             <div style={{ background: '#fff7ed', border: '2px dashed #f59e0b', borderRadius: 10, padding: '1rem' }}>
               <p style={{ fontSize: '0.8rem', color: '#92400e', marginBottom: '0.75rem', fontWeight: 600 }}>
-                🎥 Si une vidéo ET une image sont définies, la vidéo est prioritaire. Lien direct .mp4 uniquement.
+                Si une vidéo ET une image sont définies, la vidéo est prioritaire. Lien direct .mp4 uniquement.
               </p>
               <input type="text" id="bg_video_url" name="bg_video_url"
                 value={formData.bg_video_url} onChange={handleChange}

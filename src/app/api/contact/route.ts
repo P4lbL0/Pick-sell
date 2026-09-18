@@ -1,12 +1,5 @@
-import { createClient } from '@supabase/supabase-js'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { NextRequest, NextResponse } from 'next/server'
-
-function getSupabase() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  if (!url || !key) throw new Error('Missing Supabase env vars')
-  return createClient(url, key)
-}
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -22,7 +15,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email invalide' }, { status: 400 })
     }
 
-    const supabase = getSupabase()
+    const supabase = getSupabaseAdmin()
     const { error } = await supabase.from('contact_messages').insert([{
       name: name.trim().slice(0, 200),
       email: email.trim().toLowerCase().slice(0, 200),

@@ -1,7 +1,10 @@
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { NextRequest, NextResponse } from 'next/server'
+import { requireAdmin } from '@/lib/supabase-auth'
 
 export async function PUT(request: NextRequest) {
+  const denied = await requireAdmin()
+  if (denied) return denied
   try {
     const body = await request.json()
     const { universe, service_type, fields } = body

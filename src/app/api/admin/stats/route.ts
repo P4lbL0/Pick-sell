@@ -1,5 +1,6 @@
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { NextRequest, NextResponse } from 'next/server'
+import { requireAdmin } from '@/lib/supabase-auth'
 
 interface EventRow {
   id: string
@@ -27,6 +28,8 @@ interface ProductRow {
 }
 
 export async function GET(request: NextRequest) {
+  const denied = await requireAdmin()
+  if (denied) return denied
   try {
     const { searchParams } = new URL(request.url)
     const days = Math.min(365, Math.max(1, Number(searchParams.get('days')) || 30))

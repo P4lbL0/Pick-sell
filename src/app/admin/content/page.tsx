@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
+import { adminApi } from '@/lib/admin-api'
 import { ContentBlock } from '@/lib/types'
 import ContentForm from '@/components/admin/ContentForm'
 import ContentTable from '@/components/admin/ContentTable'
@@ -19,13 +19,8 @@ export default function ContentPage() {
   const fetchContents = async () => {
     setLoading(true)
     try {
-      const { data, error } = await supabase
-        .from('content_blocks')
-        .select('*')
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      setContents(data || [])
+      const data = await adminApi<ContentBlock[]>('content-blocks')
+      setContents(data.map(c => ({ ...c, id: String(c.id) })))
     } catch (error) {
       console.error('Erreur lors du chargement des contenus:', error)
     } finally {
@@ -37,14 +32,10 @@ export default function ContentPage() {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce bloc de contenu ?')) return
 
     try {
-      const { error } = await supabase
-        .from('content_blocks')
-        .delete()
-        .eq('id', id)
-      if (error) throw error
+      await adminApi(`content-blocks?id=${id}`, { method: 'DELETE' })
       setContents(contents.filter(c => c.id !== id))
     } catch (error) {
-      console.error('Erreur lors de la suppression:', error)
+      alert(error instanceof Error ? error.message : 'Erreur lors de la suppression')
     }
   }
 

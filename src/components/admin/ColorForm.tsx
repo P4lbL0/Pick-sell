@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { adminApi } from '@/lib/admin-api'
 import { ProductColor, Product } from '@/lib/types'
 
 interface ColorFormProps {
@@ -72,20 +73,13 @@ export default function ColorForm({ color, onClose }: ColorFormProps) {
     setError('')
     try {
       if (color?.id) {
-        const { error: updateError } = await supabase
-          .from('product_colors')
-          .update(formData)
-          .eq('id', color.id)
-        if (updateError) throw updateError
+        await adminApi('colors', { method: 'PUT', body: { id: color.id, ...formData } })
       } else {
-        const { error: insertError } = await supabase
-          .from('product_colors')
-          .insert([{ ...formData, created_at: new Date().toISOString() }])
-        if (insertError) throw insertError
+        await adminApi('colors', { method: 'POST', body: formData })
       }
       onClose()
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Erreur')
     } finally {
       setLoading(false)
     }
@@ -110,7 +104,7 @@ export default function ColorForm({ color, onClose }: ColorFormProps) {
             <option value="">— Sélectionner un produit —</option>
             {products.map((p) => (
               <option key={p.id} value={p.id}>
-                [{p.universe === 'horlogerie' ? '⌚' : '💻'}] {p.title}
+                [{p.universe === 'horlogerie' ? 'Horlogerie' : 'Informatique'}] {p.title}
               </option>
             ))}
           </select>

@@ -1,9 +1,8 @@
 'use client'
 
 import React, { useState } from 'react'
-import { supabase } from '@/lib/supabase'
+import { adminApi } from '@/lib/admin-api'
 import { HeroSlide } from '@/lib/types'
-import { revalidateHeroSlides } from '@/app/admin/actions'
 
 interface HeroSlideFormProps {
   slide?: HeroSlide | null
@@ -87,23 +86,14 @@ export default function HeroSlideForm({ slide, onClose, defaultUniverse = 'horlo
       }
 
       if (slide?.id) {
-        const { error: updateError } = await supabase
-          .from('hero_slides')
-          .update(payload)
-          .eq('id', slide.id)
-        if (updateError) throw updateError
+        await adminApi('hero-slides', { method: 'PUT', body: { id: slide.id, ...payload } })
       } else {
-        const { error: insertError } = await supabase
-          .from('hero_slides')
-          .insert([payload])
-        if (insertError) throw insertError
+        await adminApi('hero-slides', { method: 'POST', body: payload })
       }
 
-      await revalidateHeroSlides(formData.universe_type)
-
       onClose()
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Erreur')
     } finally {
       setLoading(false)
     }

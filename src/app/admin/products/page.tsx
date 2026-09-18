@@ -1,9 +1,8 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
+import { adminApi } from '@/lib/admin-api'
 import { Product } from '@/lib/types'
-import { revalidateProductPages } from '@/app/admin/actions'
 import ProductForm from '@/components/admin/ProductForm'
 import ProductTable from '@/components/admin/ProductTable'
 
@@ -21,16 +20,8 @@ export default function ProductsPage() {
   const fetchProducts = async () => {
     setLoading(true)
     try {
-      let query = supabase.from('products').select('*')
-      
-      if (filterUniverse !== 'all') {
-        query = query.eq('universe', filterUniverse)
-      }
-
-      const { data, error } = await query.order('created_at', { ascending: false })
-
-      if (error) throw error
-      setProducts(data || [])
+      const data = await adminApi<Product[]>(`products?universe=${filterUniverse}`)
+      setProducts(data.map(p => ({ ...p, id: String(p.id) })))
     } catch (error) {
       console.error('Erreur lors du chargement des produits:', error)
     } finally {
@@ -42,17 +33,10 @@ export default function ProductsPage() {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) return
 
     try {
-      const product = products.find(p => p.id === id)
-      const { error } = await supabase.from('products').delete().eq('id', id)
-      if (error) throw error
+      await adminApi(`products?id=${id}`, { method: 'DELETE' })
       setProducts(products.filter(p => p.id !== id))
-      
-      // Revalidate the product pages
-      if (product) {
-        await revalidateProductPages(product.universe)
-      }
     } catch (error) {
-      console.error('Erreur lors de la suppression:', error)
+      alert(error instanceof Error ? error.message : 'Erreur lors de la suppression')
     }
   }
 

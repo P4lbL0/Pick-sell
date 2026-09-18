@@ -1,9 +1,8 @@
 'use client'
 
 import React, { useState } from 'react'
-import { supabase } from '@/lib/supabase'
+import { adminApi } from '@/lib/admin-api'
 import { Product } from '@/lib/types'
-import { revalidateProductPages } from '@/app/admin/actions'
 
 interface ProductFormProps {
   product?: Product | null
@@ -82,27 +81,14 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
       }
 
       if (product?.id) {
-        const { error: updateError } = await supabase
-          .from('products')
-          .update(payload)
-          .eq('id', product.id)
-        if (updateError) throw updateError
+        await adminApi('products', { method: 'PUT', body: { id: product.id, ...payload } })
       } else {
-        const { error: insertError } = await supabase
-          .from('products')
-          .insert([{
-            ...payload,
-            created_at: new Date().toISOString(),
-          }])
-        if (insertError) throw insertError
+        await adminApi('products', { method: 'POST', body: payload })
       }
 
-      // Revalidate the product pages on Vercel
-      await revalidateProductPages(formData.universe)
-
       onClose()
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Erreur')
     } finally {
       setLoading(false)
     }
@@ -230,7 +216,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
           <label htmlFor="image_file">Photo du produit *</label>
           <div style={{ background: '#f0f4ff', border: '2px dashed #667eea', borderRadius: 10, padding: '1rem', marginBottom: '0.5rem' }}>
             <p style={{ fontSize: '0.8rem', color: '#4a5568', marginBottom: '0.75rem', fontWeight: 600 }}>
-              📍 Cette photo apparaît sur la fiche produit et dans la liste des produits.
+              Cette photo apparaît sur la fiche produit et dans la liste des produits.
             </p>
             <label style={{
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
@@ -239,7 +225,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
               fontWeight: 700, fontSize: '1rem', cursor: uploading ? 'not-allowed' : 'pointer',
               minHeight: 52, width: '100%', boxSizing: 'border-box' as const,
             }}>
-              {uploading ? '⏳ Upload en cours...' : '📷 Choisir une photo'}
+              {uploading ? 'Upload en cours...' : 'Choisir une photo'}
               <input type="file" id="image_file" accept="image/*"
                 onChange={handleImageUpload} disabled={uploading}
                 style={{ display: 'none' }} />
@@ -250,7 +236,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                 <img src={preview} alt="Aperçu"
                   style={{ width: 80, height: 80, borderRadius: 8, objectFit: 'cover', border: '2px solid #667eea' }} />
                 <div>
-                  <p style={{ fontSize: '0.8rem', color: '#22c55e', fontWeight: 700 }}>✅ Photo chargée</p>
+                  <p style={{ fontSize: '0.8rem', color: '#22c55e', fontWeight: 700 }}>Photo chargée</p>
                   <button type="button" onClick={() => { setPreview(''); setFormData(p => ({ ...p, image_url: '' })) }}
                     style={{ fontSize: '0.75rem', color: '#e53e3e', background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginTop: 4 }}>
                     ✕ Supprimer

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { supabase } from '@/lib/supabase'
+import { adminApi } from '@/lib/admin-api'
 import { Service } from '@/lib/types'
 
 interface ServiceFormProps {
@@ -16,8 +16,7 @@ export default function ServiceForm({ service, onClose }: ServiceFormProps) {
     universe: service?.universe || 'horlogerie',
     type: service?.type || 'repair',
     description: service?.description || '',
-    images: service?.images?.join(';') || '',
-    contactUrl: service?.contact_url || '',
+    contact_url: service?.contact_url || '',
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -36,31 +35,15 @@ export default function ServiceForm({ service, onClose }: ServiceFormProps) {
     setError('')
 
     try {
-      const payload = {
-        ...formData,
-        images: formData.images.split(';').filter(Boolean),
-        updated_at: new Date().toISOString(),
-      }
-
       if (service?.id) {
-        const { error: updateError } = await supabase
-          .from('services')
-          .update(payload)
-          .eq('id', service.id)
-        if (updateError) throw updateError
+        await adminApi('services', { method: 'PUT', body: { id: service.id, ...formData } })
       } else {
-        const { error: insertError } = await supabase
-          .from('services')
-          .insert([{
-            ...payload,
-            created_at: new Date().toISOString(),
-          }])
-        if (insertError) throw insertError
+        await adminApi('services', { method: 'POST', body: formData })
       }
 
       onClose()
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Erreur')
     } finally {
       setLoading(false)
     }
@@ -143,24 +126,12 @@ export default function ServiceForm({ service, onClose }: ServiceFormProps) {
         </div>
 
         <div className="form-group">
-          <label htmlFor="images">URLs des images (séparées par ;)</label>
-          <textarea
-            id="images"
-            name="images"
-            value={formData.images}
-            onChange={handleChange}
-            rows={3}
-            placeholder="https://exemple.com/image1.jpg;https://exemple.com/image2.jpg"
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="contactUrl">URL de contact</label>
+          <label htmlFor="contact_url">URL de contact</label>
           <input
             type="url"
-            id="contactUrl"
-            name="contactUrl"
-            value={formData.contactUrl}
+            id="contact_url"
+            name="contact_url"
+            value={formData.contact_url}
             onChange={handleChange}
             placeholder="https://..."
           />

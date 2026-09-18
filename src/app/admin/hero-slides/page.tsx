@@ -1,9 +1,8 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
+import { adminApi } from '@/lib/admin-api'
 import { HeroSlide } from '@/lib/types'
-import { revalidateHeroSlides } from '@/app/admin/actions'
 import HeroSlideForm from '@/components/admin/HeroSlideForm'
 import HeroSlideTable from '@/components/admin/HeroSlideTable'
 
@@ -31,15 +30,9 @@ export default function HeroSlidesPage() {
   const fetchSlides = async () => {
     setLoading(true)
     try {
-      const { data, error } = await supabase
-        .from('hero_slides')
-        .select('*')
-        .order('order_index', { ascending: true })
-
-      if (error) throw error
-      setSlides(data || [])
+      setSlides(await adminApi<HeroSlide[]>('hero-slides'))
     } catch (error) {
-      console.error('Erreur lors du chargement des slides:', JSON.stringify(error, null, 2))
+      console.error('Erreur lors du chargement des slides:', error)
     } finally {
       setLoading(false)
     }
@@ -48,12 +41,8 @@ export default function HeroSlidesPage() {
   const handleDelete = async (id: string) => {
     setDeleteError('')
     try {
-      const slide = slides.find(s => s.id === id)
-      const res = await fetch(`/api/admin/hero-slides?id=${id}`, { method: 'DELETE' })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Erreur suppression')
+      await adminApi(`hero-slides?id=${id}`, { method: 'DELETE' })
       setSlides(slides.filter(s => s.id !== id))
-      if (slide) await revalidateHeroSlides(slide.universe_type)
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : 'Erreur inconnue'
       setDeleteError(`Erreur : ${msg}`)

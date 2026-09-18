@@ -1,5 +1,62 @@
 # CONTEXTE PROJET — Pick Sell
-> Fichier mis à jour à chaque modification. Dernière MAJ : 2026-04-19
+> Fichier mis à jour à chaque modification. Dernière MAJ : 2026-09-18
+
+---
+
+## 🔍 AUDIT DU 2026-09-18 (code + base Supabase + prod testés)
+
+> Cette section remplace les listes de bugs plus bas quand elles se contredisent.
+
+### ✅ Corrigé le 2026-09-18 (chantier sécurité)
+- Sécurité points 1 à 7 ci-dessous : **tous corrigés** (connexion admin, RLS refermée, storage fermé, Next 16.3.5, images limitées à Supabase).
+- Admin cassé : **tout corrigé** (bannières, blocs de contenu, services — y compris le lien de contact qui ne s'enregistrait jamais —, coloris, grilles tarifaires). Testé de bout en bout.
+- Restent ouverts : sections « Données » et « Qualité / SEO / légal ».
+
+## 🔐 Connexion admin & écritures (depuis le 2026-09-18)
+
+- `/admin` et `/api/admin/*`, `/api/upload` sont protégés par `src/proxy.ts` (redirection vers `/admin/login`) **et** par `requireAdmin()` dans chaque route (`src/lib/supabase-auth.ts`).
+- Est admin un compte Supabase Auth dont `app_metadata.role = 'admin'` (modifiable seulement avec la clé service). Une inscription publique ne donne donc aucun accès.
+- **Créer / promouvoir un admin** : `node scripts/create-admin.mjs email@exemple.com "MotDePasse"` (depuis `pick-sell/`, 10 caractères min.). Relancer la commande change le mot de passe.
+- **Toutes les écritures passent par le serveur** : pages admin → `adminApi()` (`src/lib/admin-api.ts`) → routes `/api/admin/*` bâties sur `createAdminCrud()` (`src/lib/admin-crud.ts`, liste blanche de colonnes + vidage du cache ISR). Le navigateur ne doit **jamais** écrire directement dans Supabase avec la clé publique.
+- RLS : le public (clé anon) peut seulement **lire** products, product_colors, services, hero_slides, content_blocks, contacts, quote_form_configs, reviews. Aucun accès public à product_events, service_quotes, contact_messages, quote_requests. Storage : aucune policy (bucket public en lecture par URL), 5 Mo max, images uniquement.
+- **Migrations** : dossier `supabase/migrations/`, appliquées avec `supabase db query --linked -f <fichier>` (projet lié via `supabase link`). Les anciens `SUPABASE_MIGRATION*.sql` sont historiques.
+
+### 🔴 Sécurité — critique
+1. **Clé publique (anon) = droits d'écriture sur `products`** : n'importe quel visiteur peut créer / modifier / supprimer des produits directement via Supabase (testé). Cause : l'admin écrit en direct depuis le navigateur avec la clé anon, donc la RLS a été ouverte.
+2. **Storage `products` : upload ET suppression publics** (testé, y compris fichiers non-image). Toutes les photos peuvent être effacées par un inconnu.
+3. **XSS stockée possible** : `long_description` est rendue en HTML brut (`dangerouslySetInnerHTML`) et modifiable par n'importe qui (point 1).
+4. **API `/api/admin/*` sans aucune authentification** (vérifié en prod) : lecture des demandes de devis (nom, email, téléphone — problème RGPD), des stats et du CA ; écriture/suppression sur produits, services, contacts, bannières.
+5. **`/admin` ouvert** (pas de login ni de middleware).
+6. `hero_slides` : insertion publique autorisée.
+7. **Next.js 16.1.6 : failles critiques connues** (npm audit : 1 critique, 4 hautes) → monter en 16.3.x. `next.config.ts` autorise n'importe quel domaine http/https pour `next/image` (proxy d'images ouvert).
+
+### 🟠 Admin cassé (testé en base)
+- **Modifier une bannière ne fait rien** : la RLS bloque l'UPDATE anon sans renvoyer d'erreur → « enregistré » mais rien ne change. + la seule bannière en base (horlogerie) a une image vide → bandeau gris à la place du hero. C'est le « bannière qui bug » de la todo.
+- **Modifier un bloc de contenu** : échoue (colonne `updated_at` inexistante), et la RLS bloquerait de toute façon.
+- **Créer / modifier un service** : échoue (colonnes `images` et `updated_at` inexistantes). **Supprimer un service** : ne fait rien en silence (RLS).
+- **Ajouter un coloris** / **une grille tarifaire** : refusé par la RLS.
+- `PUT /api/admin/products` et `/api/admin/services` envoient `updated_at` → échouent (colonne absente). Non utilisés par les formulaires actuels, mais piège pour la suite.
+- Messages du formulaire contact (`contact_messages`) : aucune page admin pour les lire.
+
+### 🟡 Données
+- 2 blocs de contenu en double (`concept_horlogerie` / `concept-horlogerie`, idem informatique) — seuls ceux avec tiret sont utilisés.
+- `products` a 2 colonnes lien Vinted : `vinted_link` (vide partout, inutile) et `vinted_url`.
+- Services : lien WhatsApp factice `wa.me/33123456789` sur les 3 services.
+- Contacts : URL Instagram avec espace au début ; icônes en emoji ; plateforme `Instagram` avec majuscule → pas reconnue par la page contact.
+- 4 produits sans image, 4 sans lien Vinted, 1 titre en double. 11 produits à stock 0 toujours affichés au catalogue.
+- Storage : 70 fichiers / 108 Mo (≈1,5 Mo par photo, non compressées), 20 fichiers orphelins.
+- Stats : 42 des 287 événements viennent de robots et sont comptés comme des visites. `limit(5000)` sera plafonné à 1000 lignes par Supabase.
+- Types de dates mélangés (`timestamp` sans fuseau / `timestamptz`).
+- Fréquentation : 124 événements en mai, 3 en août, **aucun depuis le 1er août** (le tracking fonctionne, testé).
+- Pas de dossier de migrations : fichiers SQL V1/V2/V3 exécutés à la main, `supabase_schema.sql` est un dump non exécutable.
+
+### 🟢 Qualité / SEO / légal
+- Build OK, typecheck OK, lint : 58 erreurs (surtout `any` et apostrophes).
+- `<html lang="en">` sur un site français. Pas de metadata sur les fiches produit, pas de sitemap ni de robots.txt (404 en prod).
+- Pas de mentions légales, CGV, politique de confidentialité (obligatoire : on collecte nom/email/téléphone).
+- 230 emojis dans l'UI (33 fichiers) à remplacer par des SVG.
+- Fiches produit horlogerie / informatique dupliquées (2 × 151 lignes) ; `html-react-parser` installé mais inutilisé ; `lib/api/client.ts` quasi inutilisé.
+- CA affiché en flottant brut (`869.1800000000001`) côté API.
 
 ---
 
@@ -210,6 +267,8 @@ NEXT_PUBLIC_CONTACT_EMAIL=contact@picksel.com                      ← À mettre
 | 2026-04-19 | **Dashboard stats admin** `/admin/stats` : overview, timeline 7/30/90/365 j, top produits, ventes, répartition par univers, events récents | `src/app/admin/stats/page.tsx`, `src/app/api/admin/stats/route.ts` |
 | 2026-04-19 | **Marquage vente** : API `/api/admin/products/sell` + modal dans `ProductTable` (prix + canal vinted/direct/autre), stock auto → 0, annulation possible | `src/app/api/admin/products/sell/route.ts`, `src/components/admin/ProductTable.tsx`, `src/lib/types/index.ts` |
 | 2026-04-19 | **Sidebar admin** : ajout lien "Statistiques & ventes" | `src/app/admin/layout.tsx` |
+| 2026-09-18 | **Audit complet** code + base + prod (sécurité, admin, données, SEO) — voir section « AUDIT DU 2026-09-18 ». Aucun code modifié. | `CONTEXTE_PROJET.md` |
+| 2026-09-18 | **Chantier sécurité** : connexion admin (Supabase Auth, rôle `admin`), proxy + `requireAdmin` sur toutes les routes admin/upload, écritures admin 100 % serveur (`admin-crud`, `admin-api`), nouvelles routes `content-blocks` et `service-quotes`, migration RLS (lecture seule publique, storage fermé), Next 16.3.5, images limitées à Supabase, correctifs admin (bannières, contenus, services, coloris, grilles), emojis admin → SVG / retirés, `html-react-parser` retiré | `src/proxy.ts`, `src/lib/*`, `src/app/api/**`, `src/app/admin/**`, `src/components/admin/*`, `supabase/migrations/20260918120000_securite_rls.sql`, `scripts/create-admin.mjs` |
 
 ---
 

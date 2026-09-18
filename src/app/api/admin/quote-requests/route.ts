@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { requireAdmin } from '@/lib/supabase-auth'
 
 function getSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -9,6 +10,8 @@ function getSupabase() {
 }
 
 export async function GET(request: Request) {
+  const denied = await requireAdmin()
+  if (denied) return denied
   try {
     const url = new URL(request.url)
     const params = url.searchParams
@@ -31,6 +34,8 @@ export async function GET(request: Request) {
 }
 
 export async function PATCH(request: Request) {
+  const denied = await requireAdmin()
+  if (denied) return denied
   try {
     const body = await request.json()
     const { id, status, notes } = body

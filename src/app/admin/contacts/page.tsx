@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
+import { adminApi } from '@/lib/admin-api'
 import { Contact } from '@/lib/types'
 import ContactForm from '@/components/admin/ContactForm'
 import ContactTable from '@/components/admin/ContactTable'
@@ -19,13 +19,8 @@ export default function ContactsPage() {
   const fetchContacts = async () => {
     setLoading(true)
     try {
-      const { data, error } = await supabase
-        .from('contacts')
-        .select('*')
-        .order('platform', { ascending: true })
-
-      if (error) throw error
-      setContacts(data || [])
+      const data = await adminApi<Contact[]>('contacts')
+      setContacts(data.map(c => ({ ...c, id: String(c.id) })))
     } catch (error) {
       console.error('Erreur lors du chargement des contacts:', error)
     } finally {
@@ -35,9 +30,7 @@ export default function ContactsPage() {
 
   const handleDelete = async (id: string) => {
     try {
-      const res = await fetch(`/api/admin/contacts?id=${id}`, { method: 'DELETE' })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Erreur suppression')
+      await adminApi(`contacts?id=${id}`, { method: 'DELETE' })
       setContacts(contacts.filter(c => c.id !== id))
     } catch (error) {
       console.error('Erreur lors de la suppression:', error)

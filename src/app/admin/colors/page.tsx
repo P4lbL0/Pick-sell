@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { adminApi } from '@/lib/admin-api'
 import { ProductColor, Product } from '@/lib/types'
 import ColorForm from '@/components/admin/ColorForm'
 import ColorTable from '@/components/admin/ColorTable'
@@ -30,17 +31,8 @@ export default function ColorsPage() {
   const fetchColors = async () => {
     setLoading(true)
     try {
-      let query = supabase
-        .from('product_colors')
-        .select('*, product:products(id, title, universe)')
-
-      if (filterProduct !== 'all') {
-        query = query.eq('product_id', filterProduct)
-      }
-
-      const { data, error } = await query.order('created_at', { ascending: false })
-      if (error) throw error
-      setColors(data || [])
+      const data = await adminApi<(ProductColor & { product?: Product })[]>(`colors?product_id=${filterProduct}`)
+      setColors(data)
     } catch (error) {
       console.error('Erreur chargement coloris:', error)
     } finally {
@@ -51,11 +43,10 @@ export default function ColorsPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Supprimer ce coloris ?')) return
     try {
-      const { error } = await supabase.from('product_colors').delete().eq('id', id)
-      if (error) throw error
+      await adminApi(`colors?id=${id}`, { method: 'DELETE' })
       setColors(colors.filter(c => c.id !== id))
     } catch (error) {
-      console.error('Erreur suppression:', error)
+      alert(error instanceof Error ? error.message : 'Erreur lors de la suppression')
     }
   }
 
@@ -74,7 +65,7 @@ export default function ColorsPage() {
     <div className="admin-page">
       <div className="page-header">
         <div>
-          <h1>🎨 Coloris</h1>
+          <h1>Coloris</h1>
           <p>Gérez les variantes de couleur de vos produits</p>
         </div>
         <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
@@ -91,7 +82,7 @@ export default function ColorsPage() {
           <option value="all">Tous les produits</option>
           {products.map((p) => (
             <option key={p.id} value={p.id}>
-              {p.universe === 'horlogerie' ? '⌚' : '💻'} {p.title}
+              {p.universe === 'horlogerie' ? 'Horlogerie' : 'Informatique'} {p.title}
             </option>
           ))}
         </select>

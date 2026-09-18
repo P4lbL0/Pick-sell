@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
+import { adminApi } from '@/lib/admin-api'
 import { Service } from '@/lib/types'
 import ServiceForm from '@/components/admin/ServiceForm'
 import ServiceTable from '@/components/admin/ServiceTable'
@@ -20,16 +20,8 @@ export default function ServicesPage() {
   const fetchServices = async () => {
     setLoading(true)
     try {
-      let query = supabase.from('services').select('*')
-      
-      if (filterUniverse !== 'all') {
-        query = query.eq('universe', filterUniverse)
-      }
-
-      const { data, error } = await query.order('created_at', { ascending: false })
-
-      if (error) throw error
-      setServices(data || [])
+      const data = await adminApi<Service[]>(`services?universe=${filterUniverse}`)
+      setServices(data.map(sv => ({ ...sv, id: String(sv.id) })))
     } catch (error) {
       console.error('Erreur lors du chargement des services:', error)
     } finally {
@@ -41,11 +33,10 @@ export default function ServicesPage() {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce service ?')) return
 
     try {
-      const { error } = await supabase.from('services').delete().eq('id', id)
-      if (error) throw error
+      await adminApi(`services?id=${id}`, { method: 'DELETE' })
       setServices(services.filter(s => s.id !== id))
     } catch (error) {
-      console.error('Erreur lors de la suppression:', error)
+      alert(error instanceof Error ? error.message : 'Erreur lors de la suppression')
     }
   }
 

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import { Contact } from '@/lib/types'
+import { adminApi } from '@/lib/admin-api'
 
 interface ContactFormProps {
   contact?: Contact | null
@@ -9,11 +10,11 @@ interface ContactFormProps {
 }
 
 const PLATFORM_CONFIG: Record<string, { label: string; icon: string; inputType: 'email' | 'text' | 'tel'; placeholder: string; hint: string }> = {
-  email:     { label: 'Email',     icon: '📧', inputType: 'email', placeholder: 'contact@monsite.fr',           hint: 'Adresse email — sera transformée en lien mailto automatiquement' },
-  whatsapp:  { label: 'WhatsApp',  icon: '💬', inputType: 'tel',   placeholder: '+33612345678',                  hint: 'Numéro avec indicatif international (ex: +33612345678)' },
-  instagram: { label: 'Instagram', icon: '📷', inputType: 'text',  placeholder: 'https://instagram.com/moncompte', hint: 'Lien complet vers ton profil Instagram' },
-  tiktok:    { label: 'TikTok',    icon: '🎵', inputType: 'text',  placeholder: 'https://tiktok.com/@moncompte',  hint: 'Lien complet vers ton profil TikTok' },
-  vinted:    { label: 'Vinted',    icon: '🛍️', inputType: 'text',  placeholder: 'https://vinted.fr/member/xxx',   hint: 'Lien complet vers ton profil Vinted' },
+  email:     { label: 'Email',     icon: 'email', inputType: 'email', placeholder: 'contact@monsite.fr',           hint: 'Adresse email — sera transformée en lien mailto automatiquement' },
+  whatsapp:  { label: 'WhatsApp',  icon: 'whatsapp', inputType: 'tel',   placeholder: '+33612345678',                  hint: 'Numéro avec indicatif international (ex: +33612345678)' },
+  instagram: { label: 'Instagram', icon: 'instagram', inputType: 'text',  placeholder: 'https://instagram.com/moncompte', hint: 'Lien complet vers ton profil Instagram' },
+  tiktok:    { label: 'TikTok',    icon: 'tiktok', inputType: 'text',  placeholder: 'https://tiktok.com/@moncompte',  hint: 'Lien complet vers ton profil TikTok' },
+  vinted:    { label: 'Vinted',    icon: 'vinted', inputType: 'text',  placeholder: 'https://vinted.fr/member/xxx',   hint: 'Lien complet vers ton profil Vinted' },
 }
 
 function buildUrl(platform: string, raw: string): string {
@@ -62,21 +63,9 @@ export default function ContactForm({ contact, onClose }: ContactFormProps) {
 
     try {
       if (contact?.id) {
-        const res = await fetch(`/api/admin/contacts?id=${contact.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        })
-        const data = await res.json()
-        if (!res.ok) throw new Error(data.error || 'Erreur mise à jour')
+        await adminApi('contacts', { method: 'PUT', body: { id: contact.id, ...payload } })
       } else {
-        const res = await fetch('/api/admin/contacts', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        })
-        const data = await res.json()
-        if (!res.ok) throw new Error(data.error || 'Erreur création')
+        await adminApi('contacts', { method: 'POST', body: payload })
       }
       onClose()
     } catch (err: unknown) {
@@ -113,7 +102,7 @@ export default function ContactForm({ contact, onClose }: ContactFormProps) {
                   minWidth: 90,
                 }}
               >
-                {c.icon} {c.label}
+                {c.label}
               </button>
             ))}
           </div>
@@ -131,7 +120,7 @@ export default function ContactForm({ contact, onClose }: ContactFormProps) {
             autoComplete="off"
           />
           <small style={{ color: '#6b7280', marginTop: 4, display: 'block' }}>
-            💡 {cfg.hint}
+            {cfg.hint}
           </small>
           {rawValue && (
             <small style={{ color: '#22c55e', marginTop: 2, display: 'block' }}>
@@ -145,8 +134,8 @@ export default function ContactForm({ contact, onClose }: ContactFormProps) {
           <label>Univers *</label>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             {[
-              { val: 'horlogerie',   label: '⌚ Horlogerie' },
-              { val: 'informatique', label: '💻 Informatique' },
+              { val: 'horlogerie',   label: 'Horlogerie' },
+              { val: 'informatique', label: 'Informatique' },
             ].map(opt => (
               <button
                 key={opt.val}

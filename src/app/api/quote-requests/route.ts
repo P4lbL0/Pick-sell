@@ -1,15 +1,5 @@
-import { createClient } from '@supabase/supabase-js'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { NextRequest, NextResponse } from 'next/server'
-
-function getSupabase() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  // Use service_role key if available (bypasses RLS cleanly), fallback to anon key
-  const key =
-    process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  if (!url || !key) throw new Error('Missing Supabase env vars')
-  return createClient(url, key)
-}
 
 const UNIVERSES = ['horlogerie', 'informatique'] as const
 const SERVICE_TYPES = ['repair', 'custom', 'buyback'] as const
@@ -32,7 +22,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email invalide' }, { status: 400 })
     }
 
-    const supabase = getSupabase()
+    const supabase = getSupabaseAdmin()
     const { error } = await supabase.from('quote_requests').insert([{
       universe,
       service_type,

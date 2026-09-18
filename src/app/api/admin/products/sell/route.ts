@@ -1,9 +1,12 @@
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { NextRequest, NextResponse } from 'next/server'
+import { requireAdmin } from '@/lib/supabase-auth'
 
 const ALLOWED_CHANNELS = new Set(['vinted', 'direct', 'autre'])
 
 export async function POST(request: NextRequest) {
+  const denied = await requireAdmin()
+  if (denied) return denied
   try {
     const body = await request.json().catch(() => ({}))
     const { id, sold_price, sold_channel, sold_at } = body as {
@@ -45,11 +48,13 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error('[products/sell] POST error:', error)
     const msg = error?.message || error?.hint || error?.details || error?.code || 'Erreur serveur'
-    return NextResponse.json({ error: msg, raw: error }, { status: 500 })
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 }
 
 export async function DELETE(request: NextRequest) {
+  const denied = await requireAdmin()
+  if (denied) return denied
   try {
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { adminApi } from '@/lib/admin-api'
 import type { ServiceQuote, QuoteRequest, QuoteFormConfig } from '@/lib/types'
 import QuoteForm from '@/components/admin/QuoteForm'
 import QuoteTable from '@/components/admin/QuoteTable'
@@ -75,12 +76,7 @@ export default function QuotesPage() {
   const fetchQuotes = async () => {
     setPricingLoading(true)
     try {
-      let query = supabase.from('service_quotes').select('*')
-      if (filterUniverse !== 'all') query = query.eq('universe', filterUniverse)
-      if (filterType !== 'all') query = query.eq('service_type', filterType)
-      const { data, error } = await query.order('created_at', { ascending: false })
-      if (error) throw error
-      setQuotes(data || [])
+      setQuotes(await adminApi<ServiceQuote[]>(`service-quotes?universe=${filterUniverse}&service_type=${filterType}`))
     } catch (err) {
       console.error('Erreur chargement grilles:', err)
     } finally {
@@ -94,8 +90,12 @@ export default function QuotesPage() {
 
   const handleDeleteQuote = async (id: string) => {
     if (!confirm('Supprimer ce devis ?')) return
-    await supabase.from('service_quotes').delete().eq('id', id)
-    setQuotes(quotes.filter((q) => q.id !== id))
+    try {
+      await adminApi(`service-quotes?id=${id}`, { method: 'DELETE' })
+      setQuotes(quotes.filter((q) => q.id !== id))
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Erreur lors de la suppression')
+    }
   }
 
   const handleFormClose = () => {
@@ -142,7 +142,7 @@ export default function QuotesPage() {
     <div className="admin-page">
       <div className="page-header">
         <div>
-          <h1>💰 Devis</h1>
+          <h1>Devis</h1>
           <p>Gérez les demandes clients, les grilles tarifaires et la configuration des formulaires</p>
         </div>
         {activeTab === 'pricing' && (
@@ -155,7 +155,7 @@ export default function QuotesPage() {
       {/* Onglets */}
       <div style={{ display: 'flex', borderBottom: '1px solid #e5e7eb', marginBottom: 24, gap: 4 }}>
         <button style={tabStyle('requests')} onClick={() => setActiveTab('requests')}>
-          📨 Demandes reçues
+          Demandes reçues
           {requests.length > 0 && activeTab !== 'requests' && (
             <span
               style={{
@@ -172,10 +172,10 @@ export default function QuotesPage() {
           )}
         </button>
         <button style={tabStyle('pricing')} onClick={() => setActiveTab('pricing')}>
-          💰 Grilles tarifaires
+          Grilles tarifaires
         </button>
         <button style={tabStyle('config')} onClick={() => setActiveTab('config')}>
-          ⚙️ Formulaires
+          Formulaires
         </button>
       </div>
 
@@ -189,8 +189,8 @@ export default function QuotesPage() {
               className="filter-select"
             >
               <option value="all">Tous les univers</option>
-              <option value="horlogerie">⌚ Horlogerie</option>
-              <option value="informatique">💻 Informatique</option>
+              <option value="horlogerie">Horlogerie</option>
+              <option value="informatique">Informatique</option>
             </select>
             <select
               value={filterReqType}
@@ -198,9 +198,9 @@ export default function QuotesPage() {
               className="filter-select"
             >
               <option value="all">Tous les types</option>
-              <option value="repair">🔧 Réparation</option>
-              <option value="custom">✨ Personnalisation</option>
-              <option value="buyback">🔄 Reprise</option>
+              <option value="repair">Réparation</option>
+              <option value="custom">Personnalisation</option>
+              <option value="buyback">Reprise</option>
             </select>
             <select
               value={filterReqStatus}
@@ -208,11 +208,11 @@ export default function QuotesPage() {
               className="filter-select"
             >
               <option value="all">Tous les statuts</option>
-              <option value="new">🔵 Nouveau</option>
-              <option value="read">👁️ Lu</option>
-              <option value="in_progress">🔄 En cours</option>
-              <option value="done">✅ Traité</option>
-              <option value="rejected">❌ Refusé</option>
+              <option value="new">Nouveau</option>
+              <option value="read">Lu</option>
+              <option value="in_progress">En cours</option>
+              <option value="done">Traité</option>
+              <option value="rejected">Refusé</option>
             </select>
           </div>
           {reqLoading ? (
@@ -237,8 +237,8 @@ export default function QuotesPage() {
               className="filter-select"
             >
               <option value="all">Tous les univers</option>
-              <option value="horlogerie">⌚ Horlogerie</option>
-              <option value="informatique">💻 Informatique</option>
+              <option value="horlogerie">Horlogerie</option>
+              <option value="informatique">Informatique</option>
             </select>
             <select
               value={filterType}
@@ -246,9 +246,9 @@ export default function QuotesPage() {
               className="filter-select"
             >
               <option value="all">Tous les types</option>
-              <option value="repair">🔧 Réparation</option>
-              <option value="custom">✨ Personnalisation</option>
-              <option value="buyback">🔄 Reprise</option>
+              <option value="repair">Réparation</option>
+              <option value="custom">Personnalisation</option>
+              <option value="buyback">Reprise</option>
             </select>
           </div>
           {showForm && <QuoteForm quote={editingQuote} onClose={handleFormClose} />}

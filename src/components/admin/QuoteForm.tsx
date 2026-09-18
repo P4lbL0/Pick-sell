@@ -1,8 +1,9 @@
 'use client'
 
 import React, { useState } from 'react'
-import { supabase } from '@/lib/supabase'
+import { adminApi } from '@/lib/admin-api'
 import { ServiceQuote, QuoteItem } from '@/lib/types'
+import { AdminIcon } from '@/components/admin/AdminIcon'
 
 interface QuoteFormProps {
   quote?: ServiceQuote | null
@@ -75,23 +76,15 @@ export default function QuoteForm({ quote, onClose }: QuoteFormProps) {
       const payload = {
         ...formData,
         items: validItems,
-        updated_at: new Date().toISOString(),
       }
       if (quote?.id) {
-        const { error: updateError } = await supabase
-          .from('service_quotes')
-          .update(payload)
-          .eq('id', quote.id)
-        if (updateError) throw updateError
+        await adminApi('service-quotes', { method: 'PUT', body: { id: quote.id, ...payload } })
       } else {
-        const { error: insertError } = await supabase
-          .from('service_quotes')
-          .insert([{ ...payload, created_at: new Date().toISOString() }])
-        if (insertError) throw insertError
+        await adminApi('service-quotes', { method: 'POST', body: payload })
       }
       onClose()
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Erreur')
     } finally {
       setLoading(false)
     }
@@ -121,16 +114,16 @@ export default function QuoteForm({ quote, onClose }: QuoteFormProps) {
           <div className="form-group">
             <label htmlFor="universe">Univers *</label>
             <select id="universe" name="universe" value={formData.universe} onChange={handleChange} required>
-              <option value="horlogerie">⌚ Horlogerie</option>
-              <option value="informatique">💻 Informatique</option>
+              <option value="horlogerie">Horlogerie</option>
+              <option value="informatique">Informatique</option>
             </select>
           </div>
           <div className="form-group">
             <label htmlFor="service_type">Type de service *</label>
             <select id="service_type" name="service_type" value={formData.service_type} onChange={handleChange} required>
-              <option value="repair">🔧 Réparation / Révision</option>
-              <option value="custom">✨ Personnalisation / Sur-mesure</option>
-              <option value="buyback">🔄 Reprise</option>
+              <option value="repair">Réparation / Révision</option>
+              <option value="custom">Personnalisation / Sur-mesure</option>
+              <option value="buyback">Reprise</option>
             </select>
           </div>
         </div>
@@ -193,7 +186,7 @@ export default function QuoteForm({ quote, onClose }: QuoteFormProps) {
               <div className="quote-item-actions">
                 <button type="button" className="btn-icon" onClick={() => moveItem(index, 'up')} disabled={index === 0} title="Monter">↑</button>
                 <button type="button" className="btn-icon" onClick={() => moveItem(index, 'down')} disabled={index === items.length - 1} title="Descendre">↓</button>
-                <button type="button" className="btn-icon delete" onClick={() => removeItem(index)} disabled={items.length === 1} title="Supprimer">🗑️</button>
+                <button type="button" className="btn-icon delete" onClick={() => removeItem(index)} disabled={items.length === 1} title="Supprimer" aria-label="Supprimer"><AdminIcon name="trash" className="nav-icon" /></button>
               </div>
             </div>
           ))}

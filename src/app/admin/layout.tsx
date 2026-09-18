@@ -2,33 +2,35 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { getSupabaseBrowser } from '@/lib/supabase-browser'
+import { AdminIcon, type AdminIconName } from '@/components/admin/AdminIcon'
 import '../../styles/admin.css'
 
-const navItems = [
+const navItems: { section: string; links: { href: string; label: string; icon: AdminIconName; external?: boolean }[] }[] = [
   {
     section: 'Gestion',
     links: [
-      { href: '/admin', label: 'Tableau de bord', icon: '📊' },
-      { href: '/admin/stats', label: 'Statistiques & ventes', icon: '📈' },
-      { href: '/admin/products', label: 'Produits', icon: '📦' },
-      { href: '/admin/colors', label: 'Coloris', icon: '🎨' },
-      { href: '/admin/services', label: 'Services', icon: '🔧' },
-      { href: '/admin/quotes', label: 'Devis', icon: '💰' },
+      { href: '/admin', label: 'Tableau de bord', icon: 'dashboard' },
+      { href: '/admin/stats', label: 'Statistiques & ventes', icon: 'chart' },
+      { href: '/admin/products', label: 'Produits', icon: 'box' },
+      { href: '/admin/colors', label: 'Coloris', icon: 'palette' },
+      { href: '/admin/services', label: 'Services', icon: 'wrench' },
+      { href: '/admin/quotes', label: 'Devis', icon: 'receipt' },
     ],
   },
   {
     section: 'Contenu',
     links: [
-      { href: '/admin/content', label: 'Blocs de contenu', icon: '📝' },
-      { href: '/admin/hero-slides', label: 'Bannières accueil', icon: '🖼️' },
-      { href: '/admin/contacts', label: 'Contacts', icon: '📞' },
+      { href: '/admin/content', label: 'Blocs de contenu', icon: 'text' },
+      { href: '/admin/hero-slides', label: 'Bannières accueil', icon: 'image' },
+      { href: '/admin/contacts', label: 'Contacts', icon: 'phone' },
     ],
   },
   {
     section: 'Utilitaires',
     links: [
-      { href: '/', label: 'Voir le site', icon: '👁️', external: true },
+      { href: '/', label: 'Voir le site', icon: 'eye', external: true },
     ],
   },
 ]
@@ -50,11 +52,11 @@ function SidebarContent({ pathname, onClose }: { pathname: string; onClose?: () 
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    target={'external' in link && link.external ? '_blank' : undefined}
+                    target={link.external ? '_blank' : undefined}
                     className={`nav-link${pathname === link.href ? ' nav-link-active' : ''}`}
                     onClick={onClose}
                   >
-                    {link.icon} {link.label}
+                    <AdminIcon name={link.icon} />{link.label}
                   </Link>
                 </li>
               ))}
@@ -73,6 +75,16 @@ function SidebarContent({ pathname, onClose }: { pathname: string; onClose?: () 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
+
+  // La page de connexion s'affiche sans la barre latérale
+  if (pathname === '/admin/login') return <>{children}</>
+
+  const handleLogout = async () => {
+    await getSupabaseBrowser().auth.signOut()
+    router.replace('/admin/login')
+    router.refresh()
+  }
 
   return (
     <div className="admin-container">
@@ -88,7 +100,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Drawer mobile */}
       <aside className={`admin-drawer${menuOpen ? ' admin-drawer-open' : ''}`}>
-        <button className="drawer-close" onClick={() => setMenuOpen(false)}>✕</button>
+        <button className="drawer-close" onClick={() => setMenuOpen(false)} aria-label="Fermer le menu">
+          <AdminIcon name="close" className="nav-icon" />
+        </button>
         <SidebarContent pathname={pathname} onClose={() => setMenuOpen(false)} />
       </aside>
 
@@ -106,6 +120,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
           <div className="header-actions">
             <span className="user-badge">Admin</span>
+            <button className="btn-logout" onClick={handleLogout}>Déconnexion</button>
           </div>
         </header>
 
