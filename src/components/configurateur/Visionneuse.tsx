@@ -337,8 +337,7 @@ export default function Visionneuse({ config, eclatement, onToucherPiece, onEtat
 
     // ---- chargement
     const draco = new DRACOLoader()
-    draco.setDecoderPath('/draco/')
-    draco.setDecoderConfig({ type: 'wasm' })
+    draco.setDecoderPath('/draco/') // décodeur WebAssembly servi par le site
     const chargeur = new GLTFLoader()
     chargeur.setDRACOLoader(draco)
     let annule = false
