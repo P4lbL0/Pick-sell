@@ -1,5 +1,5 @@
 # CONTEXTE PROJET — Pick Sell
-> Fichier mis à jour à chaque modification. Dernière MAJ : 2026-09-18
+> Fichier mis à jour à chaque modification. Dernière MAJ : 2026-09-19
 
 ---
 
@@ -13,6 +13,17 @@
 - Restent ouverts : sections « Données » et « Qualité / SEO / légal ».
 - Front responsive (même jour) : menu mobile ajouté sur les univers (il n'y avait aucune navigation sous 768 px), débordement horizontal de 12 px corrigé, pied de page branché sur la table `contacts` (liens email/WhatsApp/Instagram/TikTok étaient cassés), page Contact nettoyée (@pseudo, icônes SVG, section vide masquée), bannières sans image ni vidéo ignorées (repli sur le hero du thème), `lang="fr"`, animations désactivées si l'utilisateur réduit les animations. Vérifié sans débordement à 320 / 375 / 768 / 1280 px sur 15 pages. Captures : `docs/screens/`.
 - Données corrigées : lien WhatsApp au format international (`wa.me/33…`, l'ancien `wa.me/06…` ne fonctionnait pas), URL Instagram sans espace, plateforme en minuscules. L'admin convertit maintenant un numéro saisi en 06… automatiquement.
+
+## ⌚ Configurateur 3D (démo, depuis le 2026-09-19)
+
+- **Page cachée** `/horlogerie/configurateur` : reliée nulle part, `noindex`. Démo à faire valider par la boutique ; elle **remplacera la page Sur-mesure** (`/horlogerie/services/custom`) une fois validée — ne pas toucher à Sur-mesure d'ici là.
+- L'acheteur tourne la montre en 3D, l'écarte avec le curseur « Vue éclatée », touche une pièce pour ouvrir ses choix, voit le prix bouger, puis envoie une **demande de devis** (table `quote_requests`, `service_type = 'custom'`, `data.source = 'configurateur'`).
+- **Catalogue** : `src/lib/configurateur/catalogue.ts` = **exemples** (`CATALOGUE_DEMO = true`, bandeau « Démo » sur la page, mention « prix d'exemple » jusque dans l'admin). À remplacer par la liste de la boutique (questionnaire envoyé). Prix de base 140 € : la configuration de départ (montre phare, produit n° 51) retombe sur son prix réel de 160 €.
+- **Règles** (incompatibilités, prix, code de lien) : `src/lib/configurateur/regles.ts`, partagé page / serveur. La route `/api/quote-requests` **recalcule** prix et récapitulatif à partir du code : on ne fait pas confiance à la page.
+- **Lien partageable** : `?c=cadran.lunette.bracelet.aiguilles.chiffres.couleurChiffres.date.fond` (ex. `?c=noir.cannelee.president.baton.arabes.noir.aucune.transparent`). L'admin Devis affiche la montre composée et un bouton « Voir la montre en 3D ».
+- **3D** : three.js (`src/components/configurateur/Visionneuse.tsx`), rendu à la demande (rien ne tourne quand l'image est fixe). Modèle `public/configurateur/montre.glb` (0,9 Mo, compressé Draco, décodeur dans `public/draco/`), toutes les variantes dedans. Il est **généré** par `render/montre/configurateur.py` (dossier `Desktop/Projet/render`, Blender) : ne jamais l'éditer à la main, ré-exporter puis recopier. Noms des nœuds `piece__variante` = identifiants du catalogue.
+- **Crédit obligatoire** (licence CC BY 4.0 du modèle d'origine de Yevhen Artamonov) : ligne en bas du panneau, à garder.
+- Captures : `docs/screens/configurateur-desktop.jpeg`, `configurateur-eclatee.jpeg`, `configurateur-mobile.jpeg`.
 
 ## 🔐 Connexion admin & écritures (depuis le 2026-09-18)
 
@@ -272,6 +283,7 @@ NEXT_PUBLIC_CONTACT_EMAIL=contact@picksel.com                      ← À mettre
 | 2026-09-18 | **Audit complet** code + base + prod (sécurité, admin, données, SEO) — voir section « AUDIT DU 2026-09-18 ». Aucun code modifié. | `CONTEXTE_PROJET.md` |
 | 2026-09-18 | **Chantier sécurité** : connexion admin (Supabase Auth, rôle `admin`), proxy + `requireAdmin` sur toutes les routes admin/upload, écritures admin 100 % serveur (`admin-crud`, `admin-api`), nouvelles routes `content-blocks` et `service-quotes`, migration RLS (lecture seule publique, storage fermé), Next 16.3.5, images limitées à Supabase, correctifs admin (bannières, contenus, services, coloris, grilles), emojis admin → SVG / retirés, `html-react-parser` retiré | `src/proxy.ts`, `src/lib/*`, `src/app/api/**`, `src/app/admin/**`, `src/components/admin/*`, `supabase/migrations/20260918120000_securite_rls.sql`, `scripts/create-admin.mjs` |
 | 2026-09-18 | **Front responsive** : menu mobile (`Navigation`), rognage horizontal, pied de page sur la table `contacts` (`Footer` serveur), icônes partagées `Icon` / `PlatformIcon`, page Contact revue, bannières vides ignorées, `lang="fr"`, reduced-motion, onglets bannières admin qui passent à la ligne, emojis → SVG sur les pages touchées | `src/components/common/*`, `src/app/contact/*`, `src/app/horlogerie/*`, `src/app/informatique/*`, `src/app/globals.css`, `src/app/layout.tsx`, `src/app/admin/hero-slides/page.tsx`, `src/components/admin/ContactForm.tsx` |
+| 2026-09-19 | **Configurateur 3D (démo cachée)** : page `/horlogerie/configurateur` (three.js, vue éclatée au curseur, 7 pièces, nuancier, prix en direct, incompatibilités, lien partageable), catalogue d'exemple, envoi en devis avec prix recalculé côté serveur, bloc « Montre composée » + « Voir la montre en 3D » dans l'admin Devis, emojis du tableau des demandes → SVG | `src/app/horlogerie/configurateur/page.tsx`, `src/components/configurateur/*`, `src/lib/configurateur/*`, `src/app/api/quote-requests/route.ts`, `src/components/admin/QuoteRequestTable.tsx`, `src/components/admin/AdminIcon.tsx`, `public/configurateur/montre.glb`, `public/draco/*` |
 
 ---
 

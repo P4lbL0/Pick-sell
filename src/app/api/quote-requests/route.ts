@@ -1,5 +1,7 @@
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { NextRequest, NextResponse } from 'next/server'
+import { CATALOGUE_DEMO } from '@/lib/configurateur/catalogue'
+import { codeValide, decoder, formaterPrix, prix, recapitulatifTexte } from '@/lib/configurateur/regles'
 
 const UNIVERSES = ['horlogerie', 'informatique'] as const
 const SERVICE_TYPES = ['repair', 'custom', 'buyback'] as const
@@ -22,6 +24,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email invalide' }, { status: 400 })
     }
 
+    let data: Record<string, unknown> = rest
+    if (rest.source === 'configurateur') {
+      // Configurateur 3D : prix et récapitulatif recalculés ici à partir du code de la montre
+      if (universe !== 'horlogerie' || service_type !== 'custom' || !codeValide(rest.configuration)) {
+        return NextResponse.json({ error: 'Configuration invalide' }, { status: 400 })
+      }
+      const config = decoder(rest.configuration)
+      const texte = (v: unknown, max: number) => (typeof v === 'string' ? v.trim().slice(0, max) : '')
+      data = {
+        source: 'configurateur',
+        configuration: rest.configuration,
+        recapitulatif: recapitulatifTexte(config),
+        prix_indicatif: formaterPrix(prix(config)) + (CATALOGUE_DEMO ? " (prix d'exemple, démo)" : ''),
+        tour_de_poignet: texte(rest.tour_de_poignet, 20),
+        message: texte(rest.message, 2000),
+      }
+    }
+
     const supabase = getSupabaseAdmin()
     const { error } = await supabase.from('quote_requests').insert([{
       universe,
@@ -29,7 +49,7 @@ export async function POST(request: NextRequest) {
       name: name.trim().slice(0, 200),
       email: email.trim().toLowerCase().slice(0, 200),
       phone: phone?.trim().slice(0, 50) || null,
-      data: rest,
+      data,
     }])
 
     if (error) throw error

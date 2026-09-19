@@ -13,6 +13,10 @@ const PATHS = {
   eye: 'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
   close: 'M6 6l12 12M18 6L6 18',
   trash: 'M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6',
+  chevronDown: 'M6 9l6 6 6-6',
+  chevronUp: 'M6 15l6-6 6 6',
+  pencil: 'M17 3l4 4L8 20H4v-4zM14 6l4 4',
+  cube: 'M12 2l9 5v10l-9 5-9-5V7zM3 7l9 5 9-5M12 12v10',
 } as const
 
 export type AdminIconName = keyof typeof PATHS
