@@ -27,6 +27,47 @@ const ECARTS: Record<string, number> = {
 }
 const ECART_COURONNE = 0.55 // la couronne s'écarte sur le côté
 
+/**
+ * Battements par seconde d'un mouvement mécanique (28 800 alternances/heure) : la trotteuse
+ * avance par petits sauts comme une vraie montre, et on ne redessine que 8 images par seconde
+ * au lieu de 60 — l'heure vivante ne coûte presque rien en batterie.
+ */
+const BATTEMENTS = 8
+const TOUR = Math.PI * 2
+
+type RoleAiguille = 'heures' | 'minutes' | 'secondes'
+
+/** Aiguille portée par un maillage du groupe « aiguilles » (le modèle bâton nomme ses tailles). */
+function roleAiguille(nom: string): RoleAiguille | null {
+  if (/arrow_big/.test(nom)) return 'secondes'
+  if (/heures|_small/.test(nom)) return 'heures'
+  if (/minutes|_medium/.test(nom)) return 'minutes'
+  return null // chapeau central et pièces qui ne tournent pas
+}
+
+/**
+ * Heure vers laquelle pointe une aiguille dans le fichier (radians, 0 = midi, sens des aiguilles).
+ * Les aiguilles sont gravées dans la pose vitrine 10 h 10 : on mesure ce décalage une fois au
+ * chargement plutôt que de retoucher le modèle.
+ */
+function angleGrave(mesh: THREE.Mesh) {
+  const points = mesh.geometry.getAttribute('position')
+  let loin = 0
+  let x = 0
+  let z = 0
+  for (let i = 0; i < points.count; i++) {
+    const px = points.getX(i)
+    const pz = points.getZ(i)
+    const d = px * px + pz * pz
+    if (d > loin) {
+      loin = d
+      x = px
+      z = pz
+    }
+  }
+  return Math.atan2(x, -z)
+}
+
 /** Groupe du modèle -> pièce du configurateur (toucher la pièce ouvre ses choix). */
 const PIECE_DE_GROUPE: Record<string, PieceId> = {
   lunette: 'lunette',
@@ -215,6 +256,7 @@ export default function Visionneuse({ config, eclatement, onToucherPiece, onEtat
     const groupes = new Map<string, THREE.Object3D>()
     const variantes: { objet: THREE.Object3D; reglage: keyof Configuration; valeur: string }[] = []
     const heure3: THREE.Object3D[] = []
+    const aiguilles: { objet: THREE.Object3D; role: RoleAiguille; grave: number }[] = []
     let guichet: THREE.Object3D | null = null
     let loupe: THREE.Object3D | null = null
     let couronne: THREE.Object3D | null = null
@@ -240,6 +282,44 @@ export default function Visionneuse({ config, eclatement, onToucherPiece, onEtat
         controles.update()
       }
     }
+
+    // ---- heure réelle
+    function poserHeure() {
+      const d = new Date()
+      // la trotteuse saute de battement en battement, les deux autres avancent en continu
+      const s = Math.floor((d.getSeconds() + d.getMilliseconds() / 1000) * BATTEMENTS) / BATTEMENTS
+      const m = d.getMinutes() + s / 60
+      const h = (d.getHours() % 12) + m / 60
+      const cible = { secondes: (s / 60) * TOUR, minutes: (m / 60) * TOUR, heures: (h / 12) * TOUR }
+      for (const a of aiguilles) a.objet.rotation.y = a.grave - cible[a.role]
+    }
+
+    // L'heure ne tourne que si la montre est visible : onglet caché ou montre sortie de l'écran,
+    // on arrête tout (même principe que le rendu à la demande).
+    let battement = 0
+    let pret = false
+    let aLEcran = true
+    function majHorloge() {
+      const doitTourner = pret && aLEcran && !document.hidden
+      if (doitTourner === battement > 0) return // déjà dans le bon état
+      if (doitTourner) {
+        poserHeure()
+        demander()
+        battement = window.setInterval(() => {
+          poserHeure()
+          demander()
+        }, 1000 / BATTEMENTS)
+      } else {
+        clearInterval(battement)
+        battement = 0
+      }
+    }
+    const vue = new IntersectionObserver(([e]) => {
+      aLEcran = e.isIntersecting
+      majHorloge()
+    })
+    vue.observe(hote)
+    document.addEventListener('visibilitychange', majHorloge)
 
     function image(temps: number) {
       enCours = 0
@@ -363,10 +443,17 @@ export default function Visionneuse({ config, eclatement, onToucherPiece, onEtat
             mesh.material = o.name === 'boitier_rehaut' ? matieres.rehaut : matieres[nom] ?? matieres.acier_poli
           }
         })
+        groupes.get('aiguilles')?.traverse((o) => {
+          const mesh = o as THREE.Mesh
+          const role = mesh.isMesh ? roleAiguille(o.name) : null
+          if (role) aiguilles.push({ objet: o, role, grave: angleGrave(mesh) })
+        })
         racine.add(gltf.scene)
         appliquerConfig(derniereConfig.current)
         poserEclatement(dernierEclatement.current)
         rappels.current.onEtat({ etat: 'pret' })
+        pret = true
+        majHorloge()
         demander()
       },
       (ev) => {
@@ -379,7 +466,11 @@ export default function Visionneuse({ config, eclatement, onToucherPiece, onEtat
 
     return () => {
       annule = true
+      pret = false
       scene3d.current = null
+      majHorloge()
+      vue.disconnect()
+      document.removeEventListener('visibilitychange', majHorloge)
       observateur.disconnect()
       cancelAnimationFrame(enCours)
       controles.dispose()
